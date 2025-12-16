@@ -8,6 +8,12 @@ import (
 
 // RegisterRoutes sets up the routes for the application.
 // It accepts handlers as dependencies.
-func RegisterRoutes(router *gin.Engine, homeHandler *handler.HomeHandler) {
-	router.GET("/", homeHandler.GetHome)
+func RegisterRoutes(
+	router *gin.Engine,
+	userHandler *handler.UserHandler,
+) {
+	userRoutes := router.Group("/users")
+	{
+		userRoutes.POST("", userHandler.CreateUser)
+	}
 }

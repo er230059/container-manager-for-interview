@@ -5,24 +5,33 @@ import (
 	"leadtek/internal/infrastructure/persistence"
 	"leadtek/internal/server"
 	"leadtek/internal/server/handler"
+	"log"
 
+	"github.com/bwmarrin/snowflake"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	// 1. Create dependencies (Composition Root)
+
 	// Infrastructure Layer
-	greetingRepo := persistence.NewInmemGreetingRepository()
+	userRepo := persistence.NewInmemUserRepository()
+
+	// ID Generation
+	idNode, err := snowflake.NewNode(1)
+	if err != nil {
+		log.Fatalf("failed to create snowflake node: %v", err)
+	}
 
 	// Application Layer
-	greetingService := application.NewGreetingService(greetingRepo)
+	userService := application.NewUserService(userRepo, idNode)
 
 	// Interfaces Layer
-	homeHandler := handler.NewHomeHandler(greetingService)
+	userHandler := handler.NewUserHandler(userService)
 
 	// 2. Setup router and inject handlers
 	r := gin.Default()
-	server.RegisterRoutes(r, homeHandler) // Pass handler to router
+	server.RegisterRoutes(r, userHandler) // Pass handlers to router
 
 	// 3. Start the server
 	r.Run()
