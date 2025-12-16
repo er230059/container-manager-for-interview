@@ -1,20 +1,20 @@
 package application
 
 import (
-	"leadtek/internal/domain"
+	"container-manager/internal/domain"
 
 	"github.com/bwmarrin/snowflake"
 )
 
 // UserService handles the application logic for users.
 type UserService struct {
-	repo   domain.UserRepository
-	idNode *snowflake.Node
+	userRepo domain.UserRepository
+	idNode   *snowflake.Node
 }
 
 // NewUserService creates a new UserService.
-func NewUserService(repo domain.UserRepository, idNode *snowflake.Node) *UserService {
-	return &UserService{repo: repo, idNode: idNode}
+func NewUserService(userRepo domain.UserRepository, idNode *snowflake.Node) *UserService {
+	return &UserService{userRepo: userRepo, idNode: idNode}
 }
 
 // CreateUser creates a new user, generates an ID, and persists it.
@@ -25,7 +25,7 @@ func (s *UserService) CreateUser(username, password string) (*domain.User, error
 		Password: password,
 	}
 
-	err := s.repo.Create(user)
+	err := s.userRepo.Create(user)
 	if err != nil {
 		return nil, err
 	}

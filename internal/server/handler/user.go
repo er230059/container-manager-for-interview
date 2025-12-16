@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"leadtek/internal/application"
+	"container-manager/internal/application"
 	"net/http"
 	"strconv"
 

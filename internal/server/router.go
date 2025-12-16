@@ -1,7 +1,7 @@
 package server
 
 import (
-	"leadtek/internal/server/handler"
+	"container-manager/internal/server/handler"
 
 	"github.com/gin-gonic/gin"
 )

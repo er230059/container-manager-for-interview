@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
-	"leadtek/internal/application"
-	"leadtek/internal/infrastructure/persistence"
-	"leadtek/internal/server"
-	"leadtek/internal/server/handler"
-	"leadtek/pkg/config"
 	"log"
+
+	"container-manager/internal/application"
+	"container-manager/internal/infrastructure/database/sql"
+	"container-manager/internal/infrastructure/repository"
+	"container-manager/internal/server"
+	"container-manager/internal/server/handler"
+	"container-manager/pkg/config"
+	"container-manager/pkg/postgres"
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/gin-gonic/gin"
@@ -22,11 +25,17 @@ func main() {
 
 	// 1. Create dependencies (Composition Root)
 
-	// Infrastructure Layer
-	userRepo := persistence.NewInmemUserRepository()
+	// Infrastructure Layer - Database
+	db, err := postgres.NewClient(cfg.DB)
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	userDB := sql.NewUserDatabase(db)
+	userRepo := repository.NewUserRepository(userDB)
 
 	// ID Generation
-	fmt.Println(cfg.Snowflake.MachineID)
 	idNode, err := snowflake.NewNode(cfg.Snowflake.MachineID)
 	if err != nil {
 		log.Fatalf("failed to create snowflake node: %v", err)
