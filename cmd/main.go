@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"leadtek/internal/application"
 	"leadtek/internal/infrastructure/persistence"
 	"leadtek/internal/server"
 	"leadtek/internal/server/handler"
+	"leadtek/pkg/config"
 	"log"
 
 	"github.com/bwmarrin/snowflake"
@@ -12,13 +14,20 @@ import (
 )
 
 func main() {
+	// 0. Load configuration
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("failed to load configuration: %v", err)
+	}
+
 	// 1. Create dependencies (Composition Root)
 
 	// Infrastructure Layer
 	userRepo := persistence.NewInmemUserRepository()
 
 	// ID Generation
-	idNode, err := snowflake.NewNode(1)
+	fmt.Println(cfg.Snowflake.MachineID)
+	idNode, err := snowflake.NewNode(cfg.Snowflake.MachineID)
 	if err != nil {
 		log.Fatalf("failed to create snowflake node: %v", err)
 	}
@@ -31,8 +40,10 @@ func main() {
 
 	// 2. Setup router and inject handlers
 	r := gin.Default()
-	server.RegisterRoutes(r, userHandler) // Pass handlers to router
+	server.RegisterRoutes(r, userHandler)
 
 	// 3. Start the server
-	r.Run()
+	address := fmt.Sprintf(":%s", cfg.Server.Port)
+	log.Printf("Starting server on %s", address)
+	r.Run(address)
 }
