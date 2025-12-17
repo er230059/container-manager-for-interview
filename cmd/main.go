@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"container-manager/internal/application"
-	"container-manager/internal/infrastructure/database/sql"
 	"container-manager/internal/infrastructure/repository"
 	"container-manager/internal/server"
 	"container-manager/internal/server/handler"
@@ -32,8 +31,7 @@ func main() {
 	}
 	defer db.Close()
 
-	userDB := sql.NewUserDatabase(db)
-	userRepo := repository.NewUserRepository(userDB)
+	userRepo := repository.NewUserDatabase(db)
 
 	// ID Generation
 	idNode, err := snowflake.NewNode(cfg.Snowflake.MachineID)

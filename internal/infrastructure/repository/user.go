@@ -3,26 +3,37 @@ package repository
 import (
 	"container-manager/internal/domain/entity"
 	"container-manager/internal/domain/repository"
-	"container-manager/internal/infrastructure/database"
 	"context"
+	"database/sql"
+	"errors"
 )
 
-var _ repository.UserRepository = (*UserRepository)(nil)
+var _ repository.UserRepository = (*UserDatabase)(nil)
 
-type UserRepository struct {
-	db database.UserDatabase
+type UserDatabase struct {
+	db *sql.DB
 }
 
-func NewUserRepository(db database.UserDatabase) repository.UserRepository {
-	return &UserRepository{db: db}
+func NewUserDatabase(db *sql.DB) repository.UserRepository {
+	return &UserDatabase{db: db}
 }
 
-// Create saves a new user to the database.
-func (r *UserRepository) Create(ctx context.Context, user *entity.User) error {
-	return r.db.CreateUser(ctx, user.ID, user.Username, user.Password)
+func (d *UserDatabase) Create(ctx context.Context, user *entity.User) error {
+	query := "INSERT INTO users (id, username, password) VALUES ($1, $2, $3)"
+	_, err := d.db.ExecContext(ctx, query, user.ID, user.Username, user.Password)
+	return err
 }
 
-// FindByUsername retrieves a user by their username.
-func (r *UserRepository) FindByUsername(ctx context.Context, username string) (*entity.User, error) {
-	return r.db.FindByUsername(ctx, username)
+func (d *UserDatabase) FindByUsername(ctx context.Context, username string) (*entity.User, error) {
+	query := "SELECT id, username, password FROM users WHERE username = $1"
+	row := d.db.QueryRowContext(ctx, query, username)
+	user := &entity.User{}
+	err := row.Scan(&user.ID, &user.Username, &user.Password)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return user, nil
 }
