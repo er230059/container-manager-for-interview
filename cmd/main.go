@@ -34,6 +34,7 @@ func main() {
 	defer db.Close()
 
 	userRepo := repository.NewUserDatabase(db)
+	containerRepo := repository.NewContainerDatabase(db)
 
 	// Infrastructure Layer - Container Runtime
 	runtime, err := containerruntime.NewDockerContainerRuntime()
@@ -49,7 +50,7 @@ func main() {
 
 	// Application Layer
 	userService := application.NewUserService(userRepo, idNode, cfg.Server.JWTSecret)
-	containerService := application.NewContainerService(runtime)
+	containerService := application.NewContainerService(runtime, containerRepo)
 
 	// Handler Layer
 	authMiddleware := middleware.NewAuthMiddleware(cfg.Server.JWTSecret)

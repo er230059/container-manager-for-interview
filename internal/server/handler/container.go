@@ -4,6 +4,7 @@ import (
 	"container-manager/internal/application"
 	containerruntime "container-manager/internal/domain"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,12 +29,18 @@ func (h *ContainerHandler) CreateContainer(c *gin.Context) {
 		return
 	}
 
+	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		return
+	}
+
 	opts := containerruntime.ContainerCreateOptions{
 		Image: req.Image,
 		Env:   req.Env,
 	}
 
-	id, err := h.service.CreateContainer(c.Request.Context(), opts)
+	id, err := h.service.CreateContainer(c.Request.Context(), userID, opts)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create container"})
 		return

@@ -5,6 +5,7 @@ import (
 	"container-manager/internal/domain/repository"
 	"context"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/bwmarrin/snowflake"
@@ -53,7 +54,7 @@ func (s *UserService) Login(ctx context.Context, username, password string) (*en
 	}
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.ID,
+		"sub": strconv.FormatInt(user.ID, 10),
 		"exp": time.Now().Add(time.Hour * 72).Unix(),
 	})
 
