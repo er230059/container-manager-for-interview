@@ -1,31 +1,30 @@
 package application
 
 import (
-	"container-manager/internal/domain"
+	"container-manager/internal/domain/entity"
+	"container-manager/internal/domain/repository"
 
 	"github.com/bwmarrin/snowflake"
 )
 
-// UserService handles the application logic for users.
 type UserService struct {
-	userRepo domain.UserRepository
+	userRepo repository.UserRepository
 	idNode   *snowflake.Node
 }
 
-// NewUserService creates a new UserService.
-func NewUserService(userRepo domain.UserRepository, idNode *snowflake.Node) *UserService {
+func NewUserService(userRepo repository.UserRepository, idNode *snowflake.Node) *UserService {
 	return &UserService{userRepo: userRepo, idNode: idNode}
 }
 
-// CreateUser creates a new user, generates an ID, and persists it.
-func (s *UserService) CreateUser(username, password string) (*domain.User, error) {
-	user := &domain.User{
-		ID:       s.idNode.Generate().Int64(),
-		Username: username,
-		Password: password,
+func (s *UserService) CreateUser(username, plainPassword string) (*entity.User, error) {
+	id := s.idNode.Generate().Int64()
+
+	user, err := entity.NewUser(id, username, plainPassword)
+	if err != nil {
+		return nil, err
 	}
 
-	err := s.userRepo.Create(user)
+	err = s.userRepo.Create(user)
 	if err != nil {
 		return nil, err
 	}
