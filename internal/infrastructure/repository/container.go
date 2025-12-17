@@ -1,30 +1,29 @@
 package repository
 
 import (
-	"container-manager/internal/domain/entity"
 	"container-manager/internal/domain/repository"
 	"context"
 	"database/sql"
 )
 
-var _ repository.ContainerRepository = (*ContainerDatabase)(nil)
+var _ repository.ContainerUserRepository = (*ContainerUserDatabase)(nil)
 
-type ContainerDatabase struct {
+type ContainerUserDatabase struct {
 	db *sql.DB
 }
 
-func NewContainerDatabase(db *sql.DB) repository.ContainerRepository {
-	return &ContainerDatabase{db: db}
+func NewContainerDatabase(db *sql.DB) repository.ContainerUserRepository {
+	return &ContainerUserDatabase{db: db}
 }
 
-func (d *ContainerDatabase) Create(ctx context.Context, container *entity.Container) error {
-	query := "INSERT INTO containers (id, image, user_id) VALUES ($1, $2, $3)"
-	_, err := d.db.ExecContext(ctx, query, container.ID, container.Image, container.UserID)
+func (d *ContainerUserDatabase) Create(ctx context.Context, containerID string, userID int64) error {
+	query := "INSERT INTO container_user (container_id, user_id) VALUES ($1, $2)"
+	_, err := d.db.ExecContext(ctx, query, containerID, userID)
 	return err
 }
 
-func (d *ContainerDatabase) Delete(ctx context.Context, id string) error {
-	query := "DELETE FROM containers WHERE id = $1"
-	_, err := d.db.ExecContext(ctx, query, id)
+func (d *ContainerUserDatabase) Delete(ctx context.Context, containerID string) error {
+	query := "DELETE FROM container_user WHERE container_id = $1"
+	_, err := d.db.ExecContext(ctx, query, containerID)
 	return err
 }

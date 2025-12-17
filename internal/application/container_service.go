@@ -9,12 +9,12 @@ import (
 )
 
 type ContainerService struct {
-	runtime    containerruntime.ContainerRuntime
-	repository repository.ContainerRepository
+	runtime                 containerruntime.ContainerRuntime
+	containerUserRepository repository.ContainerUserRepository
 }
 
-func NewContainerService(runtime containerruntime.ContainerRuntime, repository repository.ContainerRepository) *ContainerService {
-	return &ContainerService{runtime: runtime, repository: repository}
+func NewContainerService(runtime containerruntime.ContainerRuntime, containerUserRepository repository.ContainerUserRepository) *ContainerService {
+	return &ContainerService{runtime: runtime, containerUserRepository: containerUserRepository}
 }
 
 func (s *ContainerService) CreateContainer(ctx context.Context, userID int64, options containerruntime.ContainerCreateOptions) (string, error) {
@@ -25,7 +25,7 @@ func (s *ContainerService) CreateContainer(ctx context.Context, userID int64, op
 
 	container := entity.NewContainer(id, userID, options.Image)
 
-	err = s.repository.Create(ctx, container)
+	err = s.containerUserRepository.Create(ctx, container.ID, container.UserID)
 	if err != nil {
 		// Here we might want to handle the case where the container was created in the runtime
 		// but we failed to save it to the database. For now, we just return the error.
@@ -47,5 +47,5 @@ func (s *ContainerService) RemoveContainer(ctx context.Context, id string) error
 	if err := s.runtime.Remove(ctx, id); err != nil {
 		return err
 	}
-	return s.repository.Delete(ctx, id)
+	return s.containerUserRepository.Delete(ctx, id)
 }

@@ -1,11 +1,10 @@
 package repository
 
 import (
-	"container-manager/internal/domain/entity"
 	"context"
 )
 
-type ContainerRepository interface {
-	Create(ctx context.Context, container *entity.Container) error
-	Delete(ctx context.Context, id string) error
+type ContainerUserRepository interface {
+	Create(ctx context.Context, containerID string, userID int64) error
+	Delete(ctx context.Context, containerID string) error
 }
