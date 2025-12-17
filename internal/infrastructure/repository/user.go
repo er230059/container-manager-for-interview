@@ -18,15 +18,11 @@ func NewUserRepository(db database.UserDatabase) repository.UserRepository {
 }
 
 // Create saves a new user to the database.
-func (r *UserRepository) Create(user *entity.User) error {
-	// Here we could add a context with timeout.
-	ctx := context.Background()
+func (r *UserRepository) Create(ctx context.Context, user *entity.User) error {
 	return r.db.CreateUser(ctx, user.ID, user.Username, user.Password)
 }
 
 // FindByUsername retrieves a user by their username.
-func (r *UserRepository) FindByUsername(username string) (*entity.User, error) {
-	// Here we could add a context with timeout.
-	ctx := context.Background()
+func (r *UserRepository) FindByUsername(ctx context.Context, username string) (*entity.User, error) {
 	return r.db.FindByUsername(ctx, username)
 }

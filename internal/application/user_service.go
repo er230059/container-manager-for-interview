@@ -3,6 +3,7 @@ package application
 import (
 	"container-manager/internal/domain/entity"
 	"container-manager/internal/domain/repository"
+	"context"
 	"errors"
 	"time"
 
@@ -20,7 +21,7 @@ func NewUserService(userRepo repository.UserRepository, idNode *snowflake.Node, 
 	return &UserService{userRepo: userRepo, idNode: idNode, jwtSecret: jwtSecret}
 }
 
-func (s *UserService) CreateUser(username, plainPassword string) (*entity.User, error) {
+func (s *UserService) CreateUser(ctx context.Context, username, plainPassword string) (*entity.User, error) {
 	id := s.idNode.Generate().Int64()
 
 	user, err := entity.NewUser(id, username, plainPassword)
@@ -28,7 +29,7 @@ func (s *UserService) CreateUser(username, plainPassword string) (*entity.User, 
 		return nil, err
 	}
 
-	err = s.userRepo.Create(user)
+	err = s.userRepo.Create(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -36,8 +37,8 @@ func (s *UserService) CreateUser(username, plainPassword string) (*entity.User, 
 	return user, nil
 }
 
-func (s *UserService) Login(username, password string) (*entity.User, string, error) {
-	user, err := s.userRepo.FindByUsername(username)
+func (s *UserService) Login(ctx context.Context, username, password string) (*entity.User, string, error) {
+	user, err := s.userRepo.FindByUsername(ctx, username)
 	if err != nil {
 		return nil, "", err
 	}

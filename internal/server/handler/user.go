@@ -28,7 +28,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.CreateUser(req.Username, req.Password)
+	user, err := h.service.CreateUser(c.Request.Context(), req.Username, req.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
 		return
@@ -52,7 +52,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	user, token, err := h.service.Login(req.Username, req.Password)
+	user, token, err := h.service.Login(c.Request.Context(), req.Username, req.Password)
 	if err != nil {
 		if err.Error() == "crypto/bcrypt: hashedPassword is not the hash of the given password" || err.Error() == "user not found" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
