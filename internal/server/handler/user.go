@@ -34,7 +34,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"id":       strconv.FormatInt(user.ID, 10),
 		"username": user.Username,
 	})

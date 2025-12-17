@@ -48,7 +48,7 @@ func (h *ContainerHandler) CreateContainer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"id": id})
+	c.JSON(http.StatusOK, gin.H{"id": id})
 }
 
 func (h *ContainerHandler) StartContainer(c *gin.Context) {
@@ -69,6 +69,18 @@ func (h *ContainerHandler) StopContainer(c *gin.Context) {
 	err := h.service.StopContainer(c.Request.Context(), id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to stop container"})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func (h *ContainerHandler) RemoveContainer(c *gin.Context) {
+	id := c.Param("id")
+
+	err := h.service.RemoveContainer(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to remove container"})
 		return
 	}
 

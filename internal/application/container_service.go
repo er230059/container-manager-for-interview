@@ -42,3 +42,10 @@ func (s *ContainerService) StartContainer(ctx context.Context, id string) error 
 func (s *ContainerService) StopContainer(ctx context.Context, id string) error {
 	return s.runtime.Stop(ctx, id)
 }
+
+func (s *ContainerService) RemoveContainer(ctx context.Context, id string) error {
+	if err := s.runtime.Remove(ctx, id); err != nil {
+		return err
+	}
+	return s.repository.Delete(ctx, id)
+}

@@ -22,3 +22,9 @@ func (d *ContainerDatabase) Create(ctx context.Context, container *entity.Contai
 	_, err := d.db.ExecContext(ctx, query, container.ID, container.Image, container.UserID)
 	return err
 }
+
+func (d *ContainerDatabase) Delete(ctx context.Context, id string) error {
+	query := "DELETE FROM containers WHERE id = $1"
+	_, err := d.db.ExecContext(ctx, query, id)
+	return err
+}
