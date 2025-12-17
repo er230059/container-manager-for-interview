@@ -48,3 +48,15 @@ func (h *ContainerHandler) CreateContainer(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"id": id})
 }
+
+func (h *ContainerHandler) StartContainer(c *gin.Context) {
+	id := c.Param("id")
+
+	err := h.service.StartContainer(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to start container"})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}

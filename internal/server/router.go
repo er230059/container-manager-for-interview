@@ -25,5 +25,6 @@ func RegisterRoutes(
 	containerRoutes.Use(authMiddleware.Handle())
 	{
 		containerRoutes.POST("", containerHandler.CreateContainer)
+		containerRoutes.PATCH("/:id/start", containerHandler.StartContainer)
 	}
 }

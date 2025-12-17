@@ -34,3 +34,7 @@ func (s *ContainerService) CreateContainer(ctx context.Context, userID int64, op
 
 	return id, nil
 }
+
+func (s *ContainerService) StartContainer(ctx context.Context, id string) error {
+	return s.runtime.Start(ctx, id)
+}
