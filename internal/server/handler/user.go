@@ -8,23 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// UserHandler handles user-related API requests.
 type UserHandler struct {
 	service *application.UserService
 }
 
-// NewUserHandler creates a new UserHandler.
 func NewUserHandler(service *application.UserService) *UserHandler {
 	return &UserHandler{service: service}
 }
 
-// createUserRequest is the request body for creating a user.
 type createUserRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
-// CreateUser handles the POST /users request.
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var req createUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -34,15 +30,41 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 	user, err := h.service.CreateUser(req.Username, req.Password)
 	if err != nil {
-		// In a real app, you'd check for specific error types,
-		// e.g., username already exists, and return a 409 Conflict.
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
 		return
 	}
 
-	// Return the created user, but without the password.
 	c.JSON(http.StatusCreated, gin.H{
 		"id":       strconv.FormatInt(user.ID, 10),
 		"username": user.Username,
+	})
+}
+
+type loginRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+func (h *UserHandler) Login(c *gin.Context) {
+	var req loginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, token, err := h.service.Login(req.Username, req.Password)
+	if err != nil {
+		if err.Error() == "crypto/bcrypt: hashedPassword is not the hash of the given password" || err.Error() == "user not found" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to login"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":       strconv.FormatInt(user.ID, 10),
+		"username": user.Username,
+		"token":    token,
 	})
 }

@@ -37,18 +37,8 @@ func LoadConfig() (config Config, err error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
 
-	// Also read from environment variables
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-	// Set default values
-	viper.SetDefault("server.port", "8080")
-	viper.SetDefault("snowflake.machine_id", 1)
-	viper.SetDefault("db.host", "localhost")
-	viper.SetDefault("db.port", 5432)
-	viper.SetDefault("db.user", "postgres")
-	viper.SetDefault("db.password", "postgres")
-	viper.SetDefault("db.name", "container-manager")
 
 	// Find and read the config file.
 	// Ignore error if config file is not found, as we can rely on env vars and defaults.
