@@ -37,8 +37,9 @@ func (d *DockerContainerRuntime) Create(ctx context.Context, options containerru
 		ctx,
 		client.ContainerCreateOptions{
 			Config: &container.Config{
-				Image: options.Image,
+				Cmd:   options.Cmd,
 				Env:   options.Env,
+				Image: options.Image,
 			},
 		},
 	)

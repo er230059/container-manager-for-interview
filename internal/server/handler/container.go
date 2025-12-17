@@ -18,8 +18,9 @@ func NewContainerHandler(service *application.ContainerService) *ContainerHandle
 }
 
 type createContainerRequest struct {
-	Image string   `json:"image" binding:"required"`
+	Cmd   []string `json:"cmd"`
 	Env   []string `json:"env"`
+	Image string   `json:"image" binding:"required"`
 }
 
 func (h *ContainerHandler) CreateContainer(c *gin.Context) {
@@ -36,8 +37,9 @@ func (h *ContainerHandler) CreateContainer(c *gin.Context) {
 	}
 
 	opts := containerruntime.ContainerCreateOptions{
-		Image: req.Image,
+		Cmd:   req.Cmd,
 		Env:   req.Env,
+		Image: req.Image,
 	}
 
 	id, err := h.service.CreateContainer(c.Request.Context(), userID, opts)

@@ -5,8 +5,9 @@ import (
 )
 
 type ContainerCreateOptions struct {
-	Image string
+	Cmd   []string
 	Env   []string
+	Image string
 }
 
 type ContainerRuntime interface {
