@@ -8,7 +8,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
+type AuthMiddleware struct {
+	jwtSecret string
+}
+
+func NewAuthMiddleware(jwtSecret string) *AuthMiddleware {
+	return &AuthMiddleware{jwtSecret: jwtSecret}
+}
+
+func (m *AuthMiddleware) Handle() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -28,7 +36,7 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, jwt.ErrSignatureInvalid
 			}
-			return []byte(jwtSecret), nil
+			return []byte(m.jwtSecret), nil
 		})
 
 		if err != nil {

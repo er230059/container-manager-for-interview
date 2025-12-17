@@ -5,10 +5,11 @@ import (
 	"log"
 
 	"container-manager/internal/application"
-	"container-manager/internal/infrastructure/repository"
 	containerruntime "container-manager/internal/infrastructure/container_runtime"
+	"container-manager/internal/infrastructure/repository"
 	"container-manager/internal/server"
 	"container-manager/internal/server/handler"
+	"container-manager/internal/server/middleware"
 	"container-manager/pkg/config"
 	"container-manager/pkg/postgres"
 
@@ -50,13 +51,14 @@ func main() {
 	userService := application.NewUserService(userRepo, idNode, cfg.Server.JWTSecret)
 	containerService := application.NewContainerService(runtime)
 
-	// Interfaces Layer
+	// Handler Layer
+	authMiddleware := middleware.NewAuthMiddleware(cfg.Server.JWTSecret)
 	userHandler := handler.NewUserHandler(userService)
 	containerHandler := handler.NewContainerHandler(containerService)
 
 	// 2. Setup router and inject handlers
 	r := gin.Default()
-	server.RegisterRoutes(r, userHandler, containerHandler, cfg.Server.JWTSecret)
+	server.RegisterRoutes(r, userHandler, containerHandler, authMiddleware)
 
 	// 3. Start the server
 	address := fmt.Sprintf(":%s", cfg.Server.Port)
