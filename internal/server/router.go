@@ -2,16 +2,16 @@ package server
 
 import (
 	"container-manager/internal/server/handler"
+	"container-manager/internal/server/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterRoutes sets up the routes for the application.
-// It accepts handlers as dependencies.
 func RegisterRoutes(
 	router *gin.Engine,
 	userHandler *handler.UserHandler,
 	containerHandler *handler.ContainerHandler,
+	jwtSecret string,
 ) {
 	userRoutes := router.Group("/users")
 	{
@@ -20,6 +20,7 @@ func RegisterRoutes(
 	}
 
 	containerRoutes := router.Group("/containers")
+	containerRoutes.Use(middleware.AuthMiddleware(jwtSecret))
 	{
 		containerRoutes.POST("", containerHandler.CreateContainer)
 	}
