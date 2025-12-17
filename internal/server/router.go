@@ -26,5 +26,6 @@ func RegisterRoutes(
 	{
 		containerRoutes.POST("", containerHandler.CreateContainer)
 		containerRoutes.PATCH("/:id/start", containerHandler.StartContainer)
+		containerRoutes.PATCH("/:id/stop", containerHandler.StopContainer)
 	}
 }

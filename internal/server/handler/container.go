@@ -62,3 +62,15 @@ func (h *ContainerHandler) StartContainer(c *gin.Context) {
 
 	c.Status(http.StatusOK)
 }
+
+func (h *ContainerHandler) StopContainer(c *gin.Context) {
+	id := c.Param("id")
+
+	err := h.service.StopContainer(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to stop container"})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}

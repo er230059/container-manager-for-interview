@@ -38,3 +38,7 @@ func (s *ContainerService) CreateContainer(ctx context.Context, userID int64, op
 func (s *ContainerService) StartContainer(ctx context.Context, id string) error {
 	return s.runtime.Start(ctx, id)
 }
+
+func (s *ContainerService) StopContainer(ctx context.Context, id string) error {
+	return s.runtime.Stop(ctx, id)
+}
