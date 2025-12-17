@@ -53,9 +53,21 @@ func (h *ContainerHandler) CreateContainer(c *gin.Context) {
 
 func (h *ContainerHandler) StartContainer(c *gin.Context) {
 	id := c.Param("id")
-
-	err := h.service.StartContainer(c.Request.Context(), id)
+	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		return
+	}
+
+	err = h.service.StartContainer(c.Request.Context(), userID, id)
+	if err != nil {
+		if err.Error() == "permission denied" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "permission denied"})
+			return
+		} else if err.Error() == "container not found" {
+			c.JSON(http.StatusNotFound, gin.H{"error": "container not found"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to start container"})
 		return
 	}
@@ -65,9 +77,21 @@ func (h *ContainerHandler) StartContainer(c *gin.Context) {
 
 func (h *ContainerHandler) StopContainer(c *gin.Context) {
 	id := c.Param("id")
-
-	err := h.service.StopContainer(c.Request.Context(), id)
+	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		return
+	}
+
+	err = h.service.StopContainer(c.Request.Context(), userID, id)
+	if err != nil {
+		if err.Error() == "permission denied" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "permission denied"})
+			return
+		} else if err.Error() == "container not found" {
+			c.JSON(http.StatusNotFound, gin.H{"error": "container not found"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to stop container"})
 		return
 	}
@@ -77,9 +101,21 @@ func (h *ContainerHandler) StopContainer(c *gin.Context) {
 
 func (h *ContainerHandler) RemoveContainer(c *gin.Context) {
 	id := c.Param("id")
-
-	err := h.service.RemoveContainer(c.Request.Context(), id)
+	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		return
+	}
+
+	err = h.service.RemoveContainer(c.Request.Context(), userID, id)
+	if err != nil {
+		if err.Error() == "permission denied" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "permission denied"})
+			return
+		} else if err.Error() == "container not found" {
+			c.JSON(http.StatusNotFound, gin.H{"error": "container not found"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to remove container"})
 		return
 	}

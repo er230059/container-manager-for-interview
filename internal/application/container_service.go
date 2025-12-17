@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 
 	containerruntime "container-manager/internal/domain"
 	"container-manager/internal/domain/entity"
@@ -27,7 +28,7 @@ func (s *ContainerService) CreateContainer(ctx context.Context, userID int64, op
 
 	err = s.containerUserRepository.Create(ctx, container.ID, container.UserID)
 	if err != nil {
-		// Here we might want to handle the case where the container was created in the runtime
+		// TODO: Here we might want to handle the case where the container was created in the runtime
 		// but we failed to save it to the database. For now, we just return the error.
 		return "", err
 	}
@@ -35,15 +36,42 @@ func (s *ContainerService) CreateContainer(ctx context.Context, userID int64, op
 	return id, nil
 }
 
-func (s *ContainerService) StartContainer(ctx context.Context, id string) error {
+func (s *ContainerService) StartContainer(ctx context.Context, userID int64, id string) error {
+	ownerID, err := s.containerUserRepository.GetUserIDByContainerID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if ownerID != userID {
+		return errors.New("permission denied")
+	}
+
 	return s.runtime.Start(ctx, id)
 }
 
-func (s *ContainerService) StopContainer(ctx context.Context, id string) error {
+func (s *ContainerService) StopContainer(ctx context.Context, userID int64, id string) error {
+	ownerID, err := s.containerUserRepository.GetUserIDByContainerID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if ownerID != userID {
+		return errors.New("permission denied")
+	}
+
 	return s.runtime.Stop(ctx, id)
 }
 
-func (s *ContainerService) RemoveContainer(ctx context.Context, id string) error {
+func (s *ContainerService) RemoveContainer(ctx context.Context, userID int64, id string) error {
+	ownerID, err := s.containerUserRepository.GetUserIDByContainerID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if ownerID != userID {
+		return errors.New("permission denied")
+	}
+
 	if err := s.runtime.Remove(ctx, id); err != nil {
 		return err
 	}

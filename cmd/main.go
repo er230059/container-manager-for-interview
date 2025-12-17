@@ -34,7 +34,7 @@ func main() {
 	defer db.Close()
 
 	userRepo := repository.NewUserDatabase(db)
-	containerRepo := repository.NewContainerDatabase(db)
+	containerRepo := repository.NewContainerUserDatabase(db)
 
 	// Infrastructure Layer - Container Runtime
 	runtime, err := containerruntime.NewDockerContainerRuntime()
