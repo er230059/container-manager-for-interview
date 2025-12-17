@@ -2,6 +2,8 @@ package containerruntime
 
 import (
 	"context"
+	"io"
+	"os"
 
 	containerruntime "container-manager/internal/domain"
 
@@ -24,6 +26,13 @@ func NewDockerContainerRuntime() (*DockerContainerRuntime, error) {
 }
 
 func (d *DockerContainerRuntime) Create(ctx context.Context, options containerruntime.ContainerCreateOptions) (string, error) {
+	out, err := d.client.ImagePull(ctx, options.Image, client.ImagePullOptions{})
+	if err != nil {
+		panic(err)
+	}
+	defer out.Close()
+	io.Copy(os.Stdout, out)
+
 	resp, err := d.client.ContainerCreate(
 		ctx,
 		client.ContainerCreateOptions{

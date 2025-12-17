@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"container-manager/internal/application"
+	containerruntime "container-manager/internal/infrastructure/container_runtime"
 	"container-manager/internal/infrastructure/repository"
 	"container-manager/internal/server"
 	"container-manager/internal/server/handler"
@@ -33,7 +34,12 @@ func main() {
 
 	userRepo := repository.NewUserDatabase(db)
 
-	// ID Generation
+	// Infrastructure Layer - Container Runtime
+	runtime, err := containerruntime.NewDockerContainerRuntime()
+	if err != nil {
+		log.Fatalf("failed to create container runtime: %v", err)
+	}
+
 	idNode, err := snowflake.NewNode(cfg.Snowflake.MachineID)
 	if err != nil {
 		log.Fatalf("failed to create snowflake node: %v", err)
@@ -41,13 +47,15 @@ func main() {
 
 	// Application Layer
 	userService := application.NewUserService(userRepo, idNode, cfg.Server.JWTSecret)
+	containerService := application.NewContainerService(runtime)
 
 	// Interfaces Layer
 	userHandler := handler.NewUserHandler(userService)
+	containerHandler := handler.NewContainerHandler(containerService)
 
 	// 2. Setup router and inject handlers
 	r := gin.Default()
-	server.RegisterRoutes(r, userHandler)
+	server.RegisterRoutes(r, userHandler, containerHandler)
 
 	// 3. Start the server
 	address := fmt.Sprintf(":%s", cfg.Server.Port)
