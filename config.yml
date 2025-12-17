@@ -1,5 +1,6 @@
 server:
   port: "8080"
+  jwt_secret: "jwt-secret-key"
 snowflake:
   machine_id: 1
 db:

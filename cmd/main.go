@@ -42,7 +42,7 @@ func main() {
 	}
 
 	// Application Layer
-	userService := application.NewUserService(userRepo, idNode)
+	userService := application.NewUserService(userRepo, idNode, cfg.Server.JWTSecret)
 
 	// Interfaces Layer
 	userHandler := handler.NewUserHandler(userService)

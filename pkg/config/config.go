@@ -15,7 +15,8 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port string `mapstructure:"port"`
+	Port      string `mapstructure:"port"`
+	JWTSecret string `mapstructure:"jwt_secret"`
 }
 
 type SnowflakeConfig struct {
@@ -40,8 +41,6 @@ func LoadConfig() (config Config, err error) {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	// Find and read the config file.
-	// Ignore error if config file is not found, as we can rely on env vars and defaults.
 	if err = viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return

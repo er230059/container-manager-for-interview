@@ -11,12 +11,13 @@ import (
 )
 
 type UserService struct {
-	userRepo repository.UserRepository
-	idNode   *snowflake.Node
+	userRepo  repository.UserRepository
+	idNode    *snowflake.Node
+	jwtSecret string
 }
 
-func NewUserService(userRepo repository.UserRepository, idNode *snowflake.Node) *UserService {
-	return &UserService{userRepo: userRepo, idNode: idNode}
+func NewUserService(userRepo repository.UserRepository, idNode *snowflake.Node, jwtSecret string) *UserService {
+	return &UserService{userRepo: userRepo, idNode: idNode, jwtSecret: jwtSecret}
 }
 
 func (s *UserService) CreateUser(username, plainPassword string) (*entity.User, error) {
@@ -55,8 +56,7 @@ func (s *UserService) Login(username, password string) (*entity.User, string, er
 		"exp": time.Now().Add(time.Hour * 72).Unix(),
 	})
 
-	// It's better to use a secret from config
-	token, err := claims.SignedString([]byte("your-secret-key"))
+	token, err := claims.SignedString([]byte(s.jwtSecret))
 	if err != nil {
 		return nil, "", err
 	}
