@@ -8,25 +8,26 @@ import (
 	"time"
 
 	"container-manager/internal/domain/entity"
-	"container-manager/internal/domain/repository"
-	containerruntime "container-manager/internal/infrastructure/container_runtime"
+	"container-manager/internal/domain/infrastructure"
 
 	"github.com/google/uuid"
 )
 
 type ContainerService struct {
-	repo    repository.ContainerRepository
-	jobRepo repository.JobRepository
+	runtime           infrastructure.ContainerRuntime
+	containerUserRepo infrastructure.ContainerUserRepository
+	jobRepo           infrastructure.JobRepository
 }
 
-func NewContainerService(repo repository.ContainerRepository, jobRepo repository.JobRepository) *ContainerService {
+func NewContainerService(runtime infrastructure.ContainerRuntime, containerUserRepo infrastructure.ContainerUserRepository, jobRepo infrastructure.JobRepository) *ContainerService {
 	return &ContainerService{
-		repo:    repo,
-		jobRepo: jobRepo,
+		runtime:           runtime,
+		containerUserRepo: containerUserRepo,
+		jobRepo:           jobRepo,
 	}
 }
 
-func (s *ContainerService) CreateContainer(ctx context.Context, userID int64, options containerruntime.ContainerCreateOptions) (string, error) {
+func (s *ContainerService) CreateContainer(ctx context.Context, userID int64, options infrastructure.ContainerCreateOptions) (string, error) {
 	payload, err := json.Marshal(options)
 	if err != nil {
 		return "", err
@@ -51,28 +52,40 @@ func (s *ContainerService) CreateContainer(ctx context.Context, userID int64, op
 	return job.ID, nil
 }
 
-func (s *ContainerService) runCreateContainerJob(job *entity.Job, userID int64, options containerruntime.ContainerCreateOptions) {
-	jobCtx := context.Background()
+func (s *ContainerService) runCreateContainerJob(job *entity.Job, userID int64, options infrastructure.ContainerCreateOptions) {
+	ctx := context.Background()
 
 	job.Status = entity.JobStatusRunning
 	job.UpdatedAt = time.Now()
-	if err := s.jobRepo.Update(jobCtx, job); err != nil {
+	if err := s.jobRepo.Update(ctx, job); err != nil {
 		log.Printf("failed to update job %s to running: %v", job.ID, err)
 		return
 	}
 
-	container, err := s.repo.CreateContainer(jobCtx, userID, options)
+	containerID, err := s.runtime.Create(ctx, options)
 	if err != nil {
 		job.Status = entity.JobStatusFailed
 		job.Error = err.Error()
 		job.UpdatedAt = time.Now()
-		if updateErr := s.jobRepo.Update(jobCtx, job); updateErr != nil {
+		if updateErr := s.jobRepo.Update(ctx, job); updateErr != nil {
 			log.Printf("failed to update job %s to failed: %v", job.ID, updateErr)
 		}
 		return
 	}
 
-	result, err := json.Marshal(map[string]string{"container_id": container.ID})
+	err = s.containerUserRepo.Create(ctx, containerID, userID)
+	if err != nil {
+		s.runtime.Remove(ctx, containerID)
+		job.Status = entity.JobStatusFailed
+		job.Error = err.Error()
+		job.UpdatedAt = time.Now()
+		if updateErr := s.jobRepo.Update(ctx, job); updateErr != nil {
+			log.Printf("failed to update job %s to failed: %v", job.ID, updateErr)
+		}
+		return
+	}
+
+	result, err := json.Marshal(map[string]string{"container_id": containerID})
 	if err != nil {
 		job.Status = entity.JobStatusFailed
 		job.Error = "failed to marshal result"
@@ -83,40 +96,46 @@ func (s *ContainerService) runCreateContainerJob(job *entity.Job, userID int64, 
 		job.UpdatedAt = time.Now()
 	}
 
-	if updateErr := s.jobRepo.Update(jobCtx, job); updateErr != nil {
+	if updateErr := s.jobRepo.Update(ctx, job); updateErr != nil {
 		log.Printf("failed to update job %s to completed/failed: %v", job.ID, updateErr)
 	}
 }
 
 func (s *ContainerService) StartContainer(ctx context.Context, userID int64, id string) error {
-	container, err := s.repo.GetContainer(ctx, id)
+	containerUserID, err := s.containerUserRepo.GetUserIDByContainerID(ctx, id)
 	if err != nil {
 		return err
 	}
-	if container.UserID != userID {
+	if containerUserID != userID {
 		return errors.New("permission denied")
 	}
-	return s.repo.StartContainer(ctx, userID, id)
+	return s.runtime.Start(ctx, id)
 }
 
 func (s *ContainerService) StopContainer(ctx context.Context, userID int64, id string) error {
-	container, err := s.repo.GetContainer(ctx, id)
+	containerUserID, err := s.containerUserRepo.GetUserIDByContainerID(ctx, id)
 	if err != nil {
 		return err
 	}
-	if container.UserID != userID {
+	if containerUserID != userID {
 		return errors.New("permission denied")
 	}
-	return s.repo.StopContainer(ctx, userID, id)
+	return s.runtime.Stop(ctx, id)
 }
 
 func (s *ContainerService) RemoveContainer(ctx context.Context, userID int64, id string) error {
-	container, err := s.repo.GetContainer(ctx, id)
+	containerUserID, err := s.containerUserRepo.GetUserIDByContainerID(ctx, id)
 	if err != nil {
 		return err
 	}
-	if container.UserID != userID {
+	if containerUserID != userID {
 		return errors.New("permission denied")
 	}
-	return s.repo.RemoveContainer(ctx, userID, id)
+
+	err = s.containerUserRepo.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	return s.runtime.Remove(ctx, id)
 }

@@ -2,7 +2,7 @@ package handler
 
 import (
 	"container-manager/internal/application"
-	containerruntime "container-manager/internal/infrastructure/container_runtime"
+	"container-manager/internal/domain/infrastructure"
 	"net/http"
 	"strconv"
 
@@ -42,7 +42,7 @@ func (h *ContainerHandler) CreateContainer(c *gin.Context) {
 		return
 	}
 
-	opts := containerruntime.ContainerCreateOptions{
+	opts := infrastructure.ContainerCreateOptions{
 		Cmd:   req.Cmd,
 		Env:   req.Env,
 		Image: req.Image,

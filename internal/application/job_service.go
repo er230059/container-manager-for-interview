@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"container-manager/internal/domain/entity"
-	"container-manager/internal/domain/repository"
+	"container-manager/internal/domain/infrastructure"
 )
 
 type JobService interface {
@@ -13,10 +13,10 @@ type JobService interface {
 }
 
 type jobService struct {
-	jobRepo repository.JobRepository
+	jobRepo infrastructure.JobRepository
 }
 
-func NewJobService(jobRepo repository.JobRepository) JobService {
+func NewJobService(jobRepo infrastructure.JobRepository) JobService {
 	return &jobService{
 		jobRepo: jobRepo,
 	}

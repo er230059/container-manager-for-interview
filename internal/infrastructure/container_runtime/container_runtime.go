@@ -1,25 +1,14 @@
 package containerruntime
 
 import (
+	"container-manager/internal/domain/infrastructure"
 	"context"
 )
 
-type ContainerCreateOptions struct {
-	Cmd   []string
-	Env   []string
-	Image string
-}
-
-type ContainerInfo struct {
-	Cmd   []string
-	Env   []string
-	Image string
-}
-
 type ContainerRuntime interface {
-	Create(ctx context.Context, options ContainerCreateOptions) (string, error)
+	Create(ctx context.Context, options *infrastructure.ContainerCreateOptions) (string, error)
 	Start(ctx context.Context, id string) error
 	Stop(ctx context.Context, id string) error
 	Remove(ctx context.Context, id string) error
-	Inspect(ctx context.Context, id string) (*ContainerInfo, error)
+	Inspect(ctx context.Context, id string) (*infrastructure.ContainerInfo, error)
 }

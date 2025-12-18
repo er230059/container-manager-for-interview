@@ -6,7 +6,6 @@ import (
 
 	"container-manager/internal/application"
 	containerruntime "container-manager/internal/infrastructure/container_runtime"
-	database "container-manager/internal/infrastructure/database/sql"
 	"container-manager/internal/infrastructure/repository"
 	"container-manager/internal/server"
 	"container-manager/internal/server/handler"
@@ -46,10 +45,6 @@ func main() {
 	}
 	defer db.Close()
 
-	userDB := database.NewUserDatabase(db)
-	containerUserDB := database.NewContainerUserDatabase(db)
-	jobDB := database.NewJobDatabase(db)
-
 	// Infrastructure Layer - Container Runtime
 	runtime, err := containerruntime.NewDockerContainerRuntime()
 	if err != nil {
@@ -65,15 +60,15 @@ func main() {
 		log.Fatalf("failed to create snowflake node: %v", err)
 	}
 
-	// Domain Layer - Repositories
-	userRepo := repository.NewUserRepository(userDB)
-	containerRepo := repository.NewContainerRepository(runtime, containerUserDB)
-	jobRepo := repository.NewJobRepository(jobDB)
+	// Infrastructure Layer - Repositories
+	userRepo := repository.NewUserRepository(db)
+	containerUserRepo := repository.NewContainerUserRepository(db)
+	jobRepo := repository.NewJobRepository(db)
 
 	// Application Layer
 	userService := application.NewUserService(userRepo, idNode, cfg.Server.JWTSecret)
 	fileService := application.NewFileService(fileStorage)
-	containerService := application.NewContainerService(containerRepo, jobRepo)
+	containerService := application.NewContainerService(runtime, containerUserRepo, jobRepo)
 	jobService := application.NewJobService(jobRepo)
 
 	// Handler Layer

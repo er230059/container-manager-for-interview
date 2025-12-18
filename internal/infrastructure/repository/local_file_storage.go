@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"container-manager/internal/domain/repository"
+	"container-manager/internal/domain/infrastructure"
 	"fmt"
 	"io"
 	"os"
@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-var _ repository.FileStorage = (*LocalFileStorage)(nil)
+var _ infrastructure.FileStorage = (*LocalFileStorage)(nil)
 
 // LocalFileStorage implements the FileStorage interface for local disk storage.
 type LocalFileStorage struct {
@@ -17,7 +17,7 @@ type LocalFileStorage struct {
 }
 
 // NewLocalFileStorage creates a new instance of LocalFileStorage.
-func NewLocalFileStorage(basePath string) *LocalFileStorage {
+func NewLocalFileStorage(basePath string) infrastructure.FileStorage {
 	return &LocalFileStorage{
 		basePath: basePath,
 	}

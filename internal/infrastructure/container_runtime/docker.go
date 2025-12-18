@@ -1,6 +1,7 @@
 package containerruntime
 
 import (
+	"container-manager/internal/domain/infrastructure"
 	"context"
 	"io"
 	"os"
@@ -9,7 +10,7 @@ import (
 	"github.com/moby/moby/client"
 )
 
-var _ ContainerRuntime = (*DockerContainerRuntime)(nil)
+var _ infrastructure.ContainerRuntime = (*DockerContainerRuntime)(nil)
 
 type DockerContainerRuntime struct {
 	client *client.Client
@@ -23,7 +24,7 @@ func NewDockerContainerRuntime() (*DockerContainerRuntime, error) {
 	return &DockerContainerRuntime{client: cli}, nil
 }
 
-func (d *DockerContainerRuntime) Create(ctx context.Context, options ContainerCreateOptions) (string, error) {
+func (d *DockerContainerRuntime) Create(ctx context.Context, options infrastructure.ContainerCreateOptions) (string, error) {
 	out, err := d.client.ImagePull(ctx, options.Image, client.ImagePullOptions{})
 	if err != nil {
 		panic(err)
@@ -63,12 +64,12 @@ func (d *DockerContainerRuntime) Remove(ctx context.Context, id string) error {
 	return err
 }
 
-func (d *DockerContainerRuntime) Inspect(ctx context.Context, id string) (*ContainerInfo, error) {
+func (d *DockerContainerRuntime) Inspect(ctx context.Context, id string) (*infrastructure.ContainerInfo, error) {
 	resp, err := d.client.ContainerInspect(ctx, id, client.ContainerInspectOptions{})
 	if err != nil {
 		return nil, err
 	}
-	return &ContainerInfo{
+	return &infrastructure.ContainerInfo{
 		Image: resp.Container.Config.Image,
 		Cmd:   resp.Container.Config.Cmd,
 		Env:   resp.Container.Config.Env,

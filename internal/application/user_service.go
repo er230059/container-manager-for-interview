@@ -2,7 +2,7 @@ package application
 
 import (
 	"container-manager/internal/domain/entity"
-	"container-manager/internal/domain/repository"
+	"container-manager/internal/domain/infrastructure"
 	"context"
 	"errors"
 	"strconv"
@@ -13,12 +13,12 @@ import (
 )
 
 type UserService struct {
-	userRepo  repository.UserRepository
+	userRepo  infrastructure.UserRepository
 	idNode    *snowflake.Node
 	jwtSecret string
 }
 
-func NewUserService(userRepo repository.UserRepository, idNode *snowflake.Node, jwtSecret string) *UserService {
+func NewUserService(userRepo infrastructure.UserRepository, idNode *snowflake.Node, jwtSecret string) *UserService {
 	return &UserService{userRepo: userRepo, idNode: idNode, jwtSecret: jwtSecret}
 }
 

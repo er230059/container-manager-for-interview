@@ -1,19 +1,18 @@
 package application
 
 import (
+	"container-manager/internal/domain/infrastructure"
 	"errors"
 	"io"
-
-	"container-manager/internal/domain/repository"
 )
 
 // FileService handles file-related business logic.
 type FileService struct {
-	fileStorage repository.FileStorage
+	fileStorage infrastructure.FileStorage
 }
 
 // NewFileService creates a new instance of FileService.
-func NewFileService(fs repository.FileStorage) *FileService {
+func NewFileService(fs infrastructure.FileStorage) *FileService {
 	return &FileService{
 		fileStorage: fs,
 	}
