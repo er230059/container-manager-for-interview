@@ -6,7 +6,7 @@ import (
 
 	"container-manager/internal/application"
 	containerruntime "container-manager/internal/infrastructure/container_runtime"
-	"container-manager/internal/infrastructure/database/sql"
+	database "container-manager/internal/infrastructure/database/sql"
 	"container-manager/internal/infrastructure/repository"
 	"container-manager/internal/server"
 	"container-manager/internal/server/handler"
@@ -46,9 +46,9 @@ func main() {
 	}
 	defer db.Close()
 
-	userDB := sql.NewUserDatabase(db)
-	containerUserDB := sql.NewContainerUserDatabase(db)
-	jobDB := sql.NewJobDatabase(db)
+	userDB := database.NewUserDatabase(db)
+	containerUserDB := database.NewContainerUserDatabase(db)
+	jobDB := database.NewJobDatabase(db)
 
 	// Infrastructure Layer - Container Runtime
 	runtime, err := containerruntime.NewDockerContainerRuntime()

@@ -6,7 +6,7 @@ import (
 	"container-manager/internal/domain/entity"
 	"container-manager/internal/domain/repository"
 	containerruntime "container-manager/internal/infrastructure/container_runtime"
-	"container-manager/internal/infrastructure/database"
+	database "container-manager/internal/infrastructure/database/sql"
 )
 
 var _ repository.ContainerRepository = (*containerRepository)(nil)
@@ -18,11 +18,11 @@ type containerRepository struct {
 
 func NewContainerRepository(
 	runtime containerruntime.ContainerRuntime,
-	containerUserRepository database.ContainerUserDatabase,
+	containerUserDatabase *database.ContainerUserDatabase,
 ) repository.ContainerRepository {
 	return &containerRepository{
 		runtime:               runtime,
-		containerUserDatabase: containerUserRepository,
+		containerUserDatabase: *containerUserDatabase,
 	}
 }
 

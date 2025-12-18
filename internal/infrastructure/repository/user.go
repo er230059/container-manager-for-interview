@@ -3,18 +3,18 @@ package repository
 import (
 	"container-manager/internal/domain/entity"
 	"container-manager/internal/domain/repository"
-	"container-manager/internal/infrastructure/database"
+	database "container-manager/internal/infrastructure/database/sql"
 	"context"
 )
 
 var _ repository.UserRepository = (*userRepository)(nil)
 
 type userRepository struct {
-	userDatabase database.UserDatabase
+	userDatabase *database.UserDatabase
 }
 
 func NewUserRepository(
-	userDatabase database.UserDatabase,
+	userDatabase *database.UserDatabase,
 ) repository.UserRepository {
 	return &userRepository{
 		userDatabase: userDatabase,

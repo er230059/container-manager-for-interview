@@ -1,20 +1,16 @@
-package sql
+package database
 
 import (
 	"context"
 	"database/sql"
 	"errors"
-
-	"container-manager/internal/infrastructure/database"
 )
-
-var _ database.ContainerUserDatabase = (*ContainerUserDatabase)(nil)
 
 type ContainerUserDatabase struct {
 	db *sql.DB
 }
 
-func NewContainerUserDatabase(db *sql.DB) database.ContainerUserDatabase {
+func NewContainerUserDatabase(db *sql.DB) *ContainerUserDatabase {
 	return &ContainerUserDatabase{db: db}
 }
 

@@ -1,4 +1,4 @@
-package sql
+package database
 
 import (
 	"context"
@@ -6,16 +6,13 @@ import (
 	"errors"
 
 	"container-manager/internal/domain/entity"
-	"container-manager/internal/infrastructure/database"
 )
-
-var _ database.JobDatabase = (*JobDatabase)(nil)
 
 type JobDatabase struct {
 	db *sql.DB
 }
 
-func NewJobDatabase(db *sql.DB) database.JobDatabase {
+func NewJobDatabase(db *sql.DB) *JobDatabase {
 	return &JobDatabase{db: db}
 }
 

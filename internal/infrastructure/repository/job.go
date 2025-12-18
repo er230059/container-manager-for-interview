@@ -5,14 +5,14 @@ import (
 
 	"container-manager/internal/domain/entity"
 	"container-manager/internal/domain/repository"
-	"container-manager/internal/infrastructure/database"
+	database "container-manager/internal/infrastructure/database/sql"
 )
 
 type jobRepository struct {
-	db database.JobDatabase
+	db *database.JobDatabase
 }
 
-func NewJobRepository(db database.JobDatabase) repository.JobRepository {
+func NewJobRepository(db *database.JobDatabase) repository.JobRepository {
 	return &jobRepository{db: db}
 }
 
