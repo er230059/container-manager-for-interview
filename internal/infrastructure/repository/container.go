@@ -13,12 +13,12 @@ var _ repository.ContainerRepository = (*containerRepository)(nil)
 
 type containerRepository struct {
 	runtime               containerruntime.ContainerRuntime
-	containerUserDatabase database.ContainerUser
+	containerUserDatabase database.ContainerUserDatabase
 }
 
 func NewContainerRepository(
 	runtime containerruntime.ContainerRuntime,
-	containerUserRepository database.ContainerUser,
+	containerUserRepository database.ContainerUserDatabase,
 ) repository.ContainerRepository {
 	return &containerRepository{
 		runtime:               runtime,

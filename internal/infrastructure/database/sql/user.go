@@ -8,13 +8,13 @@ import (
 	"errors"
 )
 
-var _ database.User = (*UserDatabase)(nil)
+var _ database.UserDatabase = (*UserDatabase)(nil)
 
 type UserDatabase struct {
 	db *sql.DB
 }
 
-func NewUserDatabase(db *sql.DB) database.User {
+func NewUserDatabase(db *sql.DB) database.UserDatabase {
 	return &UserDatabase{db: db}
 }
 

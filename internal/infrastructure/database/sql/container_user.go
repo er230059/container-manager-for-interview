@@ -8,13 +8,13 @@ import (
 	"container-manager/internal/infrastructure/database"
 )
 
-var _ database.ContainerUser = (*ContainerUserDatabase)(nil)
+var _ database.ContainerUserDatabase = (*ContainerUserDatabase)(nil)
 
 type ContainerUserDatabase struct {
 	db *sql.DB
 }
 
-func NewContainerUserDatabase(db *sql.DB) database.ContainerUser {
+func NewContainerUserDatabase(db *sql.DB) database.ContainerUserDatabase {
 	return &ContainerUserDatabase{db: db}
 }
 

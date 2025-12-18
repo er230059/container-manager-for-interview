@@ -6,14 +6,13 @@ import (
 
 	"container-manager/internal/application"
 	containerruntime "container-manager/internal/infrastructure/container_runtime"
+	"container-manager/internal/infrastructure/database/sql"
 	"container-manager/internal/infrastructure/repository"
 	"container-manager/internal/server"
 	"container-manager/internal/server/handler"
 	"container-manager/internal/server/middleware"
 	"container-manager/pkg/config"
 	"container-manager/pkg/postgres"
-
-	"container-manager/internal/infrastructure/database/sql"
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/gin-contrib/cors"
@@ -66,7 +65,8 @@ func main() {
 	}
 
 	// Application Layer
-	userService := application.NewUserService(userDatabase, idNode, cfg.Server.JWTSecret)
+	userRepo := repository.NewUserRepository(userDatabase)
+	userService := application.NewUserService(userRepo, idNode, cfg.Server.JWTSecret)
 	fileService := application.NewFileService(fileStorage)
 
 	containerRepo := repository.NewContainerRepository(runtime, containerUserDatabase)
