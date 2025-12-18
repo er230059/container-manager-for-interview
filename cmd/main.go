@@ -6,7 +6,7 @@ import (
 
 	"container-manager/internal/application"
 	containerruntime "container-manager/internal/infrastructure/container_runtime"
-	"container-manager/internal/infrastructure/repository"
+	"container-manager/internal/infrastructure/database"
 	"container-manager/internal/server"
 	"container-manager/internal/server/handler"
 	"container-manager/internal/server/middleware"
@@ -33,8 +33,8 @@ func main() {
 	}
 	defer db.Close()
 
-	userRepo := repository.NewUserDatabase(db)
-	containerRepo := repository.NewContainerUserDatabase(db)
+	userDatabase := database.NewUserDatabase(db)
+	containerUserDatabase := database.NewContainerUserDatabase(db)
 
 	// Infrastructure Layer - Container Runtime
 	runtime, err := containerruntime.NewDockerContainerRuntime()
@@ -49,8 +49,8 @@ func main() {
 	}
 
 	// Application Layer
-	userService := application.NewUserService(userRepo, idNode, cfg.Server.JWTSecret)
-	containerService := application.NewContainerService(runtime, containerRepo)
+	userService := application.NewUserService(userDatabase, idNode, cfg.Server.JWTSecret)
+	containerService := application.NewContainerService(runtime, containerUserDatabase)
 
 	// Handler Layer
 	authMiddleware := middleware.NewAuthMiddleware(cfg.Server.JWTSecret)
