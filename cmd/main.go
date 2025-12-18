@@ -6,12 +6,14 @@ import (
 
 	"container-manager/internal/application"
 	containerruntime "container-manager/internal/infrastructure/container_runtime"
-	"container-manager/internal/infrastructure/database"
+	"container-manager/internal/infrastructure/repository"
 	"container-manager/internal/server"
 	"container-manager/internal/server/handler"
 	"container-manager/internal/server/middleware"
 	"container-manager/pkg/config"
 	"container-manager/pkg/postgres"
+
+	"container-manager/internal/infrastructure/database/sql"
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/gin-gonic/gin"
@@ -33,8 +35,8 @@ func main() {
 	}
 	defer db.Close()
 
-	userDatabase := database.NewUserDatabase(db)
-	containerUserDatabase := database.NewContainerUserDatabase(db)
+	userDatabase := sql.NewUserDatabase(db)
+	containerUserDatabase := sql.NewContainerUserDatabase(db)
 
 	// Infrastructure Layer - Container Runtime
 	runtime, err := containerruntime.NewDockerContainerRuntime()
@@ -50,7 +52,9 @@ func main() {
 
 	// Application Layer
 	userService := application.NewUserService(userDatabase, idNode, cfg.Server.JWTSecret)
-	containerService := application.NewContainerService(runtime, containerUserDatabase)
+
+	containerRepo := repository.NewContainerRepository(runtime, containerUserDatabase)
+	containerService := application.NewContainerService(containerRepo)
 
 	// Handler Layer
 	authMiddleware := middleware.NewAuthMiddleware(cfg.Server.JWTSecret)

@@ -5,13 +5,11 @@ import (
 	"io"
 	"os"
 
-	containerruntime "container-manager/internal/domain"
-
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/client"
 )
 
-var _ containerruntime.ContainerRuntime = (*DockerContainerRuntime)(nil)
+var _ ContainerRuntime = (*DockerContainerRuntime)(nil)
 
 type DockerContainerRuntime struct {
 	client *client.Client
@@ -25,7 +23,7 @@ func NewDockerContainerRuntime() (*DockerContainerRuntime, error) {
 	return &DockerContainerRuntime{client: cli}, nil
 }
 
-func (d *DockerContainerRuntime) Create(ctx context.Context, options containerruntime.ContainerCreateOptions) (string, error) {
+func (d *DockerContainerRuntime) Create(ctx context.Context, options ContainerCreateOptions) (string, error) {
 	out, err := d.client.ImagePull(ctx, options.Image, client.ImagePullOptions{})
 	if err != nil {
 		panic(err)

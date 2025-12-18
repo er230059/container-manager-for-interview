@@ -2,7 +2,7 @@ package handler
 
 import (
 	"container-manager/internal/application"
-	containerruntime "container-manager/internal/domain"
+	containerruntime "container-manager/internal/infrastructure/container_runtime"
 	"net/http"
 	"strconv"
 

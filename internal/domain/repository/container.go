@@ -2,10 +2,13 @@ package repository
 
 import (
 	"context"
+
+	containerruntime "container-manager/internal/infrastructure/container_runtime"
 )
 
-type ContainerUserRepository interface {
-	Create(ctx context.Context, containerID string, userID int64) error
-	Delete(ctx context.Context, containerID string) error
-	GetUserIDByContainerID(ctx context.Context, containerID string) (int64, error)
+type ContainerRepository interface {
+	CreateContainer(ctx context.Context, userID int64, options containerruntime.ContainerCreateOptions) (string, error)
+	StartContainer(ctx context.Context, userID int64, id string) error
+	StopContainer(ctx context.Context, userID int64, id string) error
+	RemoveContainer(ctx context.Context, userID int64, id string) error
 }
