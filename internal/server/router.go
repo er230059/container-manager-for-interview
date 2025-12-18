@@ -1,10 +1,13 @@
 package server
 
 import (
+	"container-manager/docs"
 	"container-manager/internal/server/handler"
 	"container-manager/internal/server/middleware"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // RegisterRoutes sets up the routes for the application.
@@ -15,6 +18,9 @@ func RegisterRoutes(
 	containerHandler *handler.ContainerHandler,
 	authMiddleware *middleware.AuthMiddleware,
 ) {
+	docs.SwaggerInfo.BasePath = "/"
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	userRoutes := router.Group("/users")
 	{
 		userRoutes.POST("", userHandler.CreateUser)

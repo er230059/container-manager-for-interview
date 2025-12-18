@@ -16,9 +16,21 @@ import (
 	"container-manager/internal/infrastructure/database/sql"
 
 	"github.com/bwmarrin/snowflake"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
+// @title Container Manager API
+// @version 1.0
+// @description This is a sample API for managing containers.
+
+// @host localhost:8080
+// @BasePath /
+// @schemes http
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 func main() {
 	// 0. Load configuration
 	cfg, err := config.LoadConfig()
@@ -63,6 +75,10 @@ func main() {
 
 	// 2. Setup router and inject handlers
 	r := gin.Default()
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowAllOrigins = true
+	corsConfig.AllowHeaders = []string{"Authorization", "Content-Type", "Accept"}
+	r.Use(cors.New(corsConfig))
 	server.RegisterRoutes(r, userHandler, containerHandler, authMiddleware)
 
 	// 3. Start the server
