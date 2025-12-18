@@ -56,6 +56,9 @@ func main() {
 		log.Fatalf("failed to create container runtime: %v", err)
 	}
 
+	// Infrastructure Layer - File Storage
+	fileStorage := repository.NewLocalFileStorage(cfg.Storage.BasePath)
+
 	// ID Generation
 	idNode, err := snowflake.NewNode(cfg.Snowflake.MachineID)
 	if err != nil {
@@ -64,6 +67,7 @@ func main() {
 
 	// Application Layer
 	userService := application.NewUserService(userDatabase, idNode, cfg.Server.JWTSecret)
+	fileService := application.NewFileService(fileStorage)
 
 	containerRepo := repository.NewContainerRepository(runtime, containerUserDatabase)
 	containerService := application.NewContainerService(containerRepo)
@@ -72,6 +76,7 @@ func main() {
 	authMiddleware := middleware.NewAuthMiddleware(cfg.Server.JWTSecret)
 	userHandler := handler.NewUserHandler(userService)
 	containerHandler := handler.NewContainerHandler(containerService)
+	fileHandler := handler.NewFileHandler(fileService)
 
 	// 2. Setup router and inject handlers
 	r := gin.Default()
@@ -79,7 +84,7 @@ func main() {
 	corsConfig.AllowAllOrigins = true
 	corsConfig.AllowHeaders = []string{"Authorization", "Content-Type", "Accept"}
 	r.Use(cors.New(corsConfig))
-	server.RegisterRoutes(r, userHandler, containerHandler, authMiddleware)
+	server.RegisterRoutes(r, userHandler, containerHandler, fileHandler, authMiddleware)
 
 	// 3. Start the server
 	address := fmt.Sprintf(":%s", cfg.Server.Port)

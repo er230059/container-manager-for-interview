@@ -16,6 +16,7 @@ func RegisterRoutes(
 	router *gin.Engine,
 	userHandler *handler.UserHandler,
 	containerHandler *handler.ContainerHandler,
+	fileHandler *handler.FileHandler,
 	authMiddleware *middleware.AuthMiddleware,
 ) {
 	docs.SwaggerInfo.BasePath = "/"
@@ -34,5 +35,11 @@ func RegisterRoutes(
 		containerRoutes.PATCH("/:id/start", containerHandler.StartContainer)
 		containerRoutes.PATCH("/:id/stop", containerHandler.StopContainer)
 		containerRoutes.DELETE("/:id", containerHandler.RemoveContainer)
+	}
+
+	fileRoutes := router.Group("/files")
+	fileRoutes.Use(authMiddleware.Handle())
+	{
+		fileRoutes.POST("", fileHandler.UploadFile)
 	}
 }

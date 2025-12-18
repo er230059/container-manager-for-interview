@@ -12,6 +12,11 @@ type Config struct {
 	Server    ServerConfig
 	Snowflake SnowflakeConfig
 	DB        DBConfig `mapstructure:"db"`
+	Storage   StorageConfig `mapstructure:"storage"`
+}
+
+type StorageConfig struct {
+	BasePath string `mapstructure:"base_path"`
 }
 
 type ServerConfig struct {

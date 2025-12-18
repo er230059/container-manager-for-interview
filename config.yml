@@ -9,3 +9,5 @@ db:
   user: "postgres"
   password: "password"
   name: "postgres"
+storage:
+  base_path: "./user_uploads"
