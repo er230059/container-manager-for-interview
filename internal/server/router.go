@@ -47,6 +47,6 @@ func RegisterRoutes(
 	jobRoutes := router.Group("/jobs")
 	jobRoutes.Use(authMiddleware.Handle())
 	{
-		jobRoutes.GET("/:id", jobHandler.GetJobStatus)
+		jobRoutes.GET("/:id", jobHandler.GetJob)
 	}
 }

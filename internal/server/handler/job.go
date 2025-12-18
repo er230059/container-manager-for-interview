@@ -19,7 +19,7 @@ func NewJobHandler(jobService application.JobService) *JobHandler {
 	}
 }
 
-func (h *JobHandler) GetJobStatus(c *gin.Context) {
+func (h *JobHandler) GetJob(c *gin.Context) {
 	jobID := c.Param("id")
 	if jobID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Job ID is required"})
@@ -38,5 +38,20 @@ func (h *JobHandler) GetJobStatus(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, job)
+	if job == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "job not found"})
+		return
+	}
+
+	response := JobStatusResponse{
+		ID:        job.ID,
+		Type:      job.Type,
+		Status:    string(job.Status),
+		Result:    job.Result,
+		Error:     job.Error,
+		CreatedAt: job.CreatedAt,
+		UpdatedAt: job.UpdatedAt,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
