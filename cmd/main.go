@@ -46,8 +46,9 @@ func main() {
 	}
 	defer db.Close()
 
-	userDatabase := sql.NewUserDatabase(db)
-	containerUserDatabase := sql.NewContainerUserDatabase(db)
+	userDB := sql.NewUserDatabase(db)
+	containerUserDB := sql.NewContainerUserDatabase(db)
+	jobDB := sql.NewJobDatabase(db)
 
 	// Infrastructure Layer - Container Runtime
 	runtime, err := containerruntime.NewDockerContainerRuntime()
@@ -64,19 +65,23 @@ func main() {
 		log.Fatalf("failed to create snowflake node: %v", err)
 	}
 
+	// Domain Layer - Repositories
+	userRepo := repository.NewUserRepository(userDB)
+	containerRepo := repository.NewContainerRepository(runtime, containerUserDB)
+	jobRepo := repository.NewJobRepository(jobDB)
+
 	// Application Layer
-	userRepo := repository.NewUserRepository(userDatabase)
 	userService := application.NewUserService(userRepo, idNode, cfg.Server.JWTSecret)
 	fileService := application.NewFileService(fileStorage)
-
-	containerRepo := repository.NewContainerRepository(runtime, containerUserDatabase)
-	containerService := application.NewContainerService(containerRepo)
+	containerService := application.NewContainerService(containerRepo, jobRepo)
+	jobService := application.NewJobService(jobRepo)
 
 	// Handler Layer
 	authMiddleware := middleware.NewAuthMiddleware(cfg.Server.JWTSecret)
 	userHandler := handler.NewUserHandler(userService)
 	containerHandler := handler.NewContainerHandler(containerService)
 	fileHandler := handler.NewFileHandler(fileService)
+	jobHandler := handler.NewJobHandler(jobService)
 
 	// 2. Setup router and inject handlers
 	r := gin.Default()
@@ -84,7 +89,7 @@ func main() {
 	corsConfig.AllowAllOrigins = true
 	corsConfig.AllowHeaders = []string{"Authorization", "Content-Type", "Accept"}
 	r.Use(cors.New(corsConfig))
-	server.RegisterRoutes(r, userHandler, containerHandler, fileHandler, authMiddleware)
+	server.RegisterRoutes(r, userHandler, containerHandler, fileHandler, jobHandler, authMiddleware)
 
 	// 3. Start the server
 	address := fmt.Sprintf(":%s", cfg.Server.Port)

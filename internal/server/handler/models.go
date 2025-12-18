@@ -15,6 +15,10 @@ type ContainerIDResponse struct {
 	ID string `json:"id"`
 }
 
+type JobIDResponse struct {
+	JobID string `json:"job_id"`
+}
+
 type ErrorResponse struct {
 	Error string `json:"error"`
 }

@@ -17,6 +17,7 @@ func RegisterRoutes(
 	userHandler *handler.UserHandler,
 	containerHandler *handler.ContainerHandler,
 	fileHandler *handler.FileHandler,
+	jobHandler *handler.JobHandler,
 	authMiddleware *middleware.AuthMiddleware,
 ) {
 	docs.SwaggerInfo.BasePath = "/"
@@ -41,5 +42,11 @@ func RegisterRoutes(
 	fileRoutes.Use(authMiddleware.Handle())
 	{
 		fileRoutes.POST("", fileHandler.UploadFile)
+	}
+
+	jobRoutes := router.Group("/jobs")
+	jobRoutes.Use(authMiddleware.Handle())
+	{
+		jobRoutes.GET("/:id", jobHandler.GetJobStatus)
 	}
 }
