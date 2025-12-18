@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"errors"
 
 	"container-manager/internal/domain/entity"
 	"container-manager/internal/domain/repository"
@@ -13,8 +12,8 @@ import (
 var _ repository.ContainerRepository = (*containerRepository)(nil)
 
 type containerRepository struct {
-	runtime                 containerruntime.ContainerRuntime
-	containerUserRepository database.ContainerUser
+	runtime               containerruntime.ContainerRuntime
+	containerUserDatabase database.ContainerUser
 }
 
 func NewContainerRepository(
@@ -22,67 +21,52 @@ func NewContainerRepository(
 	containerUserRepository database.ContainerUser,
 ) repository.ContainerRepository {
 	return &containerRepository{
-		runtime:                 runtime,
-		containerUserRepository: containerUserRepository,
+		runtime:               runtime,
+		containerUserDatabase: containerUserRepository,
 	}
 }
 
-func (r *containerRepository) CreateContainer(ctx context.Context, userID int64, options containerruntime.ContainerCreateOptions) (string, error) {
+func (r *containerRepository) CreateContainer(ctx context.Context, userID int64, options containerruntime.ContainerCreateOptions) (*entity.Container, error) {
 	id, err := r.runtime.Create(ctx, options)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	container := entity.NewContainer(id, userID, options.Image)
+	container := entity.NewContainer(id, userID, options.Image, options.Cmd, options.Env)
 
-	err = r.containerUserRepository.Create(ctx, container.ID, container.UserID)
+	err = r.containerUserDatabase.Create(ctx, container.ID, container.UserID)
 	if err != nil {
 		// TODO: Here we might want to handle the case where the container was created in the runtime
 		// but we failed to save it to the database. For now, we just return the error.
-		return "", err
+		return nil, err
 	}
 
-	return id, nil
+	return container, nil
 }
 
 func (r *containerRepository) StartContainer(ctx context.Context, userID int64, id string) error {
-	ownerID, err := r.containerUserRepository.GetUserIDByContainerID(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	if ownerID != userID {
-		return errors.New("permission denied")
-	}
-
 	return r.runtime.Start(ctx, id)
 }
 
 func (r *containerRepository) StopContainer(ctx context.Context, userID int64, id string) error {
-	ownerID, err := r.containerUserRepository.GetUserIDByContainerID(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	if ownerID != userID {
-		return errors.New("permission denied")
-	}
-
 	return r.runtime.Stop(ctx, id)
 }
 
 func (r *containerRepository) RemoveContainer(ctx context.Context, userID int64, id string) error {
-	ownerID, err := r.containerUserRepository.GetUserIDByContainerID(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	if ownerID != userID {
-		return errors.New("permission denied")
-	}
-
 	if err := r.runtime.Remove(ctx, id); err != nil {
 		return err
 	}
-	return r.containerUserRepository.Delete(ctx, id)
+	return r.containerUserDatabase.Delete(ctx, id)
+}
+
+func (r *containerRepository) GetContainer(ctx context.Context, id string) (*entity.Container, error) {
+	ownerID, err := r.containerUserDatabase.GetUserIDByContainerID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	info, err := r.runtime.Inspect(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return entity.NewContainer(id, ownerID, info.Image, info.Cmd, info.Env), nil
 }

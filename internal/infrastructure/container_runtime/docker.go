@@ -62,3 +62,15 @@ func (d *DockerContainerRuntime) Remove(ctx context.Context, id string) error {
 	_, err := d.client.ContainerRemove(ctx, id, client.ContainerRemoveOptions{})
 	return err
 }
+
+func (d *DockerContainerRuntime) Inspect(ctx context.Context, id string) (*ContainerInfo, error) {
+	resp, err := d.client.ContainerInspect(ctx, id, client.ContainerInspectOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return &ContainerInfo{
+		Image: resp.Container.Config.Image,
+		Cmd:   resp.Container.Config.Cmd,
+		Env:   resp.Container.Config.Env,
+	}, nil
+}
