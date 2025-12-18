@@ -35,7 +35,7 @@ type ErrorResponse struct {
 }
 
 type CreateContainerRequest struct {
-	Cmd   []string `json:"cmd" example:"tail, -f, /dev/null"`
+	Cmd   []string `json:"cmd" example:"tail,-f,/dev/null"`
 	Env   []string `json:"env" example:"FOO=BAR"`
 	Image string   `json:"image" binding:"required" example:"alpine"`
 }
