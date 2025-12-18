@@ -35,12 +35,12 @@ type ErrorResponse struct {
 }
 
 type CreateContainerRequest struct {
-	Cmd   []string `json:"cmd"`
-	Env   []string `json:"env"`
-	Image string   `json:"image" binding:"required"`
+	Cmd   []string `json:"cmd" example:"tail, -f, /dev/null"`
+	Env   []string `json:"env" example:"FOO=BAR"`
+	Image string   `json:"image" binding:"required" example:"alpine"`
 }
 
-type JobStatusResponse struct {
+type GetJobResponse struct {
 	ID        string          `json:"id"`
 	Type      string          `json:"type"`
 	Status    string          `json:"status"`

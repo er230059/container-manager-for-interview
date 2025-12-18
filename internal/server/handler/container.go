@@ -21,14 +21,13 @@ func NewContainerHandler(service *application.ContainerService) *ContainerHandle
 // @Summary Enqueue a new container creation job
 // @Description Enqueues a job to create a new container for the authenticated user.
 // @Description The job ID is returned immediately, and the status can be tracked via the /jobs/{id} endpoint.
-// @Tags containers
+// @Tags Containers
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param container body CreateContainerRequest true "Container creation request"
 // @Success 200 {object} CreateContainerResponse
 // @Router /containers [post]
-
 func (h *ContainerHandler) CreateContainer(c *gin.Context) {
 	var req CreateContainerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -63,7 +62,7 @@ func (h *ContainerHandler) CreateContainer(c *gin.Context) {
 // StartContainer godoc
 // @Summary Start a container
 // @Description Starts a specific container for the authenticated user
-// @Tags containers
+// @Tags Containers
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -97,7 +96,7 @@ func (h *ContainerHandler) StartContainer(c *gin.Context) {
 // StopContainer godoc
 // @Summary Stop a container
 // @Description Stops a specific container for the authenticated user
-// @Tags containers
+// @Tags Containers
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -131,7 +130,7 @@ func (h *ContainerHandler) StopContainer(c *gin.Context) {
 // RemoveContainer godoc
 // @Summary Remove a container
 // @Description Removes a specific container for the authenticated user
-// @Tags containers
+// @Tags Containers
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

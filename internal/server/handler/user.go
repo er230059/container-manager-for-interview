@@ -21,7 +21,7 @@ func NewUserHandler(service *application.UserService) *UserHandler {
 // CreateUser godoc
 // @Summary Create a new user
 // @Description Creates a new user with the provided details
-// @Tags users
+// @Tags Users
 // @Accept json
 // @Produce json
 // @Param user body CreateUserRequest true "User creation request"
@@ -51,7 +51,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 // Login godoc
 // @Summary User login
 // @Description Authenticates a user and returns an authentication token
-// @Tags users
+// @Tags Users
 // @Accept json
 // @Produce json
 // @Param user body LoginRequest true "User login request"

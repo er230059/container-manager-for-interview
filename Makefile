@@ -1,5 +1,5 @@
 gen-doc:
-	 swag init -g cmd/main.go -o docs
+	 swag init --parseDependency -g cmd/main.go -o docs
 
 build:
 	go mod tidy

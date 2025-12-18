@@ -36,8 +36,6 @@ func (r *containerRepository) CreateContainer(ctx context.Context, userID int64,
 
 	err = r.containerUserDatabase.Create(ctx, container.ID, container.UserID)
 	if err != nil {
-		// TODO: Here we might want to handle the case where the container was created in the runtime
-		// but we failed to save it to the database. For now, we just return the error.
 		return nil, err
 	}
 

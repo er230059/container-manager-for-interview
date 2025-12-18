@@ -25,14 +25,12 @@ func NewFileHandler(fs *application.FileService) *FileHandler {
 // UploadFile handles file upload requests.
 // @Summary Upload file
 // @Description Uploads a file to the user's dedicated storage folder.
-// @Tags files
+// @Tags Files
 // @Accept multipart/form-data
 // @Produce json
 // @Security ApiKeyAuth
 // @Param file formData file true "File to upload"
 // @Success 200 "OK"
-// @Failure 400 {object} ErrorResponse "Bad Request"
-// @Failure 500 {object} ErrorResponse "Internal Server Error"
 // @Router /files [post]
 func (h *FileHandler) UploadFile(c *gin.Context) {
 	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)

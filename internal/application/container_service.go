@@ -72,7 +72,7 @@ func (s *ContainerService) runCreateContainerJob(job *entity.Job, userID int64, 
 		return
 	}
 
-	result, err := json.Marshal(map[string]string{"containerId": container.ID})
+	result, err := json.Marshal(map[string]string{"container_id": container.ID})
 	if err != nil {
 		job.Status = entity.JobStatusFailed
 		job.Error = "failed to marshal result"

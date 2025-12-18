@@ -19,6 +19,16 @@ func NewJobHandler(jobService application.JobService) *JobHandler {
 	}
 }
 
+// Job godoc
+// @Summary Get job
+// @Description Get job by a job ID
+// @Tags Jobs
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "Job ID"
+// @Success 200 {object} GetJobResponse
+// @Router /jobs/{id} [get]
 func (h *JobHandler) GetJob(c *gin.Context) {
 	jobID := c.Param("id")
 	if jobID == "" {
@@ -43,7 +53,7 @@ func (h *JobHandler) GetJob(c *gin.Context) {
 		return
 	}
 
-	response := JobStatusResponse{
+	response := GetJobResponse{
 		ID:        job.ID,
 		Type:      job.Type,
 		Status:    string(job.Status),
