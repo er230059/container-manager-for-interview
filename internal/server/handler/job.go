@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"container-manager/internal/application"
 
@@ -25,7 +26,13 @@ func (h *JobHandler) GetJobStatus(c *gin.Context) {
 		return
 	}
 
-	job, err := h.jobService.GetJob(c.Request.Context(), jobID)
+	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		return
+	}
+
+	job, err := h.jobService.GetJob(c.Request.Context(), int64(userID), jobID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

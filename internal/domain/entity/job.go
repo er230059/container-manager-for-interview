@@ -21,6 +21,7 @@ type Job struct {
 	Payload   json.RawMessage `json:"payload"`
 	Result    json.RawMessage `json:"result"`
 	Error     string          `json:"error,omitempty"`
+	UserID    int64           `json:"user_id"`
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
 }

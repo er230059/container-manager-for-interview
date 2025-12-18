@@ -37,6 +37,7 @@ func (s *ContainerService) CreateContainer(ctx context.Context, userID int64, op
 		Type:      "container_creation",
 		Status:    entity.JobStatusPending,
 		Payload:   payload,
+		UserID:    userID,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

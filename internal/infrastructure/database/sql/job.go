@@ -20,11 +20,12 @@ func NewJobDatabase(db *sql.DB) database.JobDatabase {
 }
 
 func (db *JobDatabase) Create(ctx context.Context, job *entity.Job) error {
-	_, err := db.db.ExecContext(ctx, "INSERT INTO jobs (id, type, status, payload, created_at, updated_at)	VALUES ($1, $2, $3, $4, $5, $6)",
+	_, err := db.db.ExecContext(ctx, "INSERT INTO jobs (id, type, status, payload, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
 		job.ID,
 		job.Type,
 		job.Status,
 		job.Payload,
+		job.UserID,
 		job.CreatedAt,
 		job.UpdatedAt,
 	)
@@ -33,7 +34,7 @@ func (db *JobDatabase) Create(ctx context.Context, job *entity.Job) error {
 
 func (db *JobDatabase) GetByID(ctx context.Context, id string) (*entity.Job, error) {
 	job := &entity.Job{}
-	row := db.db.QueryRowContext(ctx, "SELECT id, type, status, payload, result, error, created_at, updated_at FROM jobs WHERE id = $1", id)
+	row := db.db.QueryRowContext(ctx, "SELECT id, type, status, payload, result, error, user_id, created_at, updated_at FROM jobs WHERE id = $1", id)
 	err := row.Scan(
 		&job.ID,
 		&job.Type,
@@ -41,6 +42,7 @@ func (db *JobDatabase) GetByID(ctx context.Context, id string) (*entity.Job, err
 		&job.Payload,
 		&job.Result,
 		&job.Error,
+		&job.UserID,
 		&job.CreatedAt,
 		&job.UpdatedAt,
 	)
