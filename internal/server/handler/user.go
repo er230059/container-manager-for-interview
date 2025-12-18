@@ -18,24 +18,19 @@ func NewUserHandler(service *application.UserService) *UserHandler {
 	return &UserHandler{service: service}
 }
 
-type createUserRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
-
 // CreateUser godoc
 // @Summary Create a new user
 // @Description Creates a new user with the provided details
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param user body createUserRequest true "User creation request"
-// @Success 200 {object} UserResponse
+// @Param user body CreateUserRequest true "User creation request"
+// @Success 200 {object} CreateUserResponse
 // @Failure 400 {object} ErrorResponse "Bad Request"
 // @Failure 500 {object} ErrorResponse "Internal Server Error"
 // @Router /users [post]
 func (h *UserHandler) CreateUser(c *gin.Context) {
-	var req createUserRequest
+	var req CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -47,15 +42,10 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"id":       strconv.FormatInt(user.ID, 10),
-		"username": user.Username,
+	c.JSON(http.StatusOK, CreateUserResponse{
+		ID:       strconv.FormatInt(user.ID, 10),
+		Username: user.Username,
 	})
-}
-
-type loginRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
 }
 
 // Login godoc
@@ -64,14 +54,14 @@ type loginRequest struct {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param user body loginRequest true "User login request"
+// @Param user body LoginRequest true "User login request"
 // @Success 200 {object} LoginResponse
 // @Failure 400 {object} ErrorResponse "Bad Request"
 // @Failure 401 {object} ErrorResponse "Unauthorized"
 // @Failure 500 {object} ErrorResponse "Internal Server Error"
 // @Router /users/login [post]
 func (h *UserHandler) Login(c *gin.Context) {
-	var req loginRequest
+	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -87,9 +77,9 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"id":       strconv.FormatInt(user.ID, 10),
-		"username": user.Username,
-		"token":    token,
+	c.JSON(http.StatusOK, LoginResponse{
+		ID:       strconv.FormatInt(user.ID, 10),
+		Username: user.Username,
+		Token:    token,
 	})
 }

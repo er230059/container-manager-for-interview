@@ -26,7 +26,7 @@ func NewContainerHandler(service *application.ContainerService) *ContainerHandle
 // @Produce json
 // @Security ApiKeyAuth
 // @Param container body CreateContainerRequest true "Container creation request"
-// @Success 200 {object} JobIDResponse
+// @Success 200 {object} CreateContainerResponse
 // @Router /containers [post]
 
 func (h *ContainerHandler) CreateContainer(c *gin.Context) {
@@ -56,7 +56,7 @@ func (h *ContainerHandler) CreateContainer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, JobIDResponse{JobID: jobID})
+	c.JSON(http.StatusOK, CreateContainerResponse{JobID: jobID})
 
 }
 

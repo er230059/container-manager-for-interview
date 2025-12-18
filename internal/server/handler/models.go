@@ -5,9 +5,19 @@ import (
 	"time"
 )
 
-type UserResponse struct {
+type CreateUserRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type CreateUserResponse struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
+}
+
+type LoginRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 type LoginResponse struct {
@@ -16,11 +26,7 @@ type LoginResponse struct {
 	Token    string `json:"token"`
 }
 
-type ContainerIDResponse struct {
-	ID string `json:"id"`
-}
-
-type JobIDResponse struct {
+type CreateContainerResponse struct {
 	JobID string `json:"job_id"`
 }
 
