@@ -10,6 +10,7 @@
 package mocks
 
 import (
+	entity "container-manager/internal/domain/entity"
 	infrastructure "container-manager/internal/domain/infrastructure"
 	context "context"
 	reflect "reflect"
@@ -57,10 +58,10 @@ func (mr *MockContainerRuntimeMockRecorder) Create(ctx, options any) *gomock.Cal
 }
 
 // Inspect mocks base method.
-func (m *MockContainerRuntime) Inspect(ctx context.Context, id string) (*infrastructure.ContainerInfo, error) {
+func (m *MockContainerRuntime) Inspect(ctx context.Context, id string) (*entity.Container, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Inspect", ctx, id)
-	ret0, _ := ret[0].(*infrastructure.ContainerInfo)
+	ret0, _ := ret[0].(*entity.Container)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

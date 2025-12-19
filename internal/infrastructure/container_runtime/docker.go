@@ -1,6 +1,7 @@
 package containerruntime
 
 import (
+	"container-manager/internal/domain/entity"
 	"container-manager/internal/domain/infrastructure"
 	"context"
 	"io"
@@ -64,14 +65,15 @@ func (d *DockerContainerRuntime) Remove(ctx context.Context, id string) error {
 	return err
 }
 
-func (d *DockerContainerRuntime) Inspect(ctx context.Context, id string) (*infrastructure.ContainerInfo, error) {
+func (d *DockerContainerRuntime) Inspect(ctx context.Context, id string) (*entity.Container, error) {
 	resp, err := d.client.ContainerInspect(ctx, id, client.ContainerInspectOptions{})
 	if err != nil {
 		return nil, err
 	}
-	return &infrastructure.ContainerInfo{
-		Image: resp.Container.Config.Image,
-		Cmd:   resp.Container.Config.Cmd,
-		Env:   resp.Container.Config.Env,
+	return &entity.Container{
+		Image:  resp.Container.Config.Image,
+		Cmd:    resp.Container.Config.Cmd,
+		Env:    resp.Container.Config.Env,
+		Status: resp.Container.State.Status,
 	}, nil
 }

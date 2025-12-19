@@ -1,16 +1,11 @@
 package infrastructure
 
 import (
+	"container-manager/internal/domain/entity"
 	"context"
 )
 
 type ContainerCreateOptions struct {
-	Cmd   []string
-	Env   []string
-	Image string
-}
-
-type ContainerInfo struct {
 	Cmd   []string
 	Env   []string
 	Image string
@@ -21,5 +16,5 @@ type ContainerRuntime interface {
 	Start(ctx context.Context, id string) error
 	Stop(ctx context.Context, id string) error
 	Remove(ctx context.Context, id string) error
-	Inspect(ctx context.Context, id string) (*ContainerInfo, error)
+	Inspect(ctx context.Context, id string) (*entity.Container, error)
 }
