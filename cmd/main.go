@@ -1,8 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"container-manager/internal/application"
 	containerruntime "container-manager/internal/infrastructure/container_runtime"
@@ -86,8 +92,30 @@ func main() {
 	r.Use(cors.New(corsConfig))
 	server.RegisterRoutes(r, userHandler, containerHandler, fileHandler, jobHandler, authMiddleware)
 
-	// 3. Start the server
+	// 3. Start the server with graceful shutdown
 	address := fmt.Sprintf(":%s", cfg.Server.Port)
-	log.Printf("Starting server on %s", address)
-	r.Run(address)
+	srv := &http.Server{
+		Addr:    address,
+		Handler: r,
+	}
+
+	go func() {
+		log.Printf("Starting server on %s", address)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown: ", err)
+	}
+
+	log.Println("Server exiting")
 }
