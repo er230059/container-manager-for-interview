@@ -1,9 +1,9 @@
 package application
 
 import (
+	"container-manager/internal/errors"
 	"context"
 	"encoding/json"
-	"errors"
 	"log"
 	"sync"
 	"time"
@@ -111,7 +111,7 @@ func (s *ContainerService) StartContainer(ctx context.Context, userID int64, id 
 	_, err, _ := s.singleflightGroup.Do("start:"+id, func() (any, error) {
 		mutex := s.getMutex(id)
 		if !mutex.TryLock() {
-			return nil, errors.New("conflict operation")
+			return nil, errors.ConflictContainerOperation
 		}
 		defer mutex.Unlock()
 
@@ -120,7 +120,7 @@ func (s *ContainerService) StartContainer(ctx context.Context, userID int64, id 
 			return nil, err
 		}
 		if containerUserID != userID {
-			return nil, errors.New("permission denied")
+			return nil, errors.PermissionDenied
 		}
 		err = s.runtime.Start(ctx, id)
 		return nil, err
@@ -132,7 +132,7 @@ func (s *ContainerService) StopContainer(ctx context.Context, userID int64, id s
 	_, err, _ := s.singleflightGroup.Do("stop:"+id, func() (any, error) {
 		mutex := s.getMutex(id)
 		if !mutex.TryLock() {
-			return nil, errors.New("conflict operation")
+			return nil, errors.ConflictContainerOperation
 		}
 		defer mutex.Unlock()
 
@@ -141,7 +141,7 @@ func (s *ContainerService) StopContainer(ctx context.Context, userID int64, id s
 			return nil, err
 		}
 		if containerUserID != userID {
-			return nil, errors.New("permission denied")
+			return nil, errors.PermissionDenied
 		}
 		err = s.runtime.Stop(ctx, id)
 		return nil, err
@@ -153,7 +153,7 @@ func (s *ContainerService) RemoveContainer(ctx context.Context, userID int64, id
 	_, err, _ := s.singleflightGroup.Do("remove:"+id, func() (any, error) {
 		mutex := s.getMutex(id)
 		if !mutex.TryLock() {
-			return nil, errors.New("conflict operation")
+			return nil, errors.ConflictContainerOperation
 		}
 		defer s.mutexMap.Delete(id)
 
@@ -162,7 +162,7 @@ func (s *ContainerService) RemoveContainer(ctx context.Context, userID int64, id
 			return nil, err
 		}
 		if containerUserID != userID {
-			return nil, errors.New("permission denied")
+			return nil, errors.PermissionDenied
 		}
 		err = s.runtime.Remove(ctx, id)
 		if err != nil {

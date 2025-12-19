@@ -1,9 +1,9 @@
 package repository
 
 import (
+	"container-manager/internal/errors"
 	"context"
 	"database/sql"
-	"errors"
 )
 
 type ContainerUserRepository struct {
@@ -32,7 +32,7 @@ func (r *ContainerUserRepository) GetUserIDByContainerID(ctx context.Context, co
 	err := r.db.QueryRowContext(ctx, query, containerID).Scan(&userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return 0, errors.New("container not found")
+			return 0, errors.ContainerNotFound
 		}
 		return 0, err
 	}

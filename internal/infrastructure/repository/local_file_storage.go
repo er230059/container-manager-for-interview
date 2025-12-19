@@ -2,7 +2,6 @@ package repository
 
 import (
 	"container-manager/internal/domain/infrastructure"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -29,19 +28,19 @@ func (s *LocalFileStorage) SaveFile(userID int64, filename string, fileContent i
 
 	// Create user directory if it doesn't exist
 	if err := os.MkdirAll(userDir, 0755); err != nil {
-		return "", fmt.Errorf("failed to create user directory: %w", err)
+		return "", err
 	}
 
 	filePath := filepath.Join(userDir, filename)
 	outFile, err := os.Create(filePath)
 	if err != nil {
-		return "", fmt.Errorf("failed to create file: %w", err)
+		return "", err
 	}
 	defer outFile.Close()
 
 	_, err = io.Copy(outFile, fileContent)
 	if err != nil {
-		return "", fmt.Errorf("failed to write file content: %w", err)
+		return "", err
 	}
 
 	return filePath, nil

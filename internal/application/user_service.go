@@ -3,8 +3,8 @@ package application
 import (
 	"container-manager/internal/domain/entity"
 	"container-manager/internal/domain/infrastructure"
+	"container-manager/internal/errors"
 	"context"
-	"errors"
 	"strconv"
 	"time"
 
@@ -45,7 +45,7 @@ func (s *UserService) Login(ctx context.Context, username, password string) (*en
 	}
 
 	if user == nil {
-		return nil, "", errors.New("user not found")
+		return nil, "", errors.UserNotFound
 	}
 
 	err = user.ValidatePassword(password)

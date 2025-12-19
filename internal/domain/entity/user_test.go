@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"errors"
+	"container-manager/internal/errors"
 	"testing"
 
 	"golang.org/x/crypto/bcrypt"
@@ -44,8 +44,8 @@ func TestNewUser(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error for empty password, got nil")
 		}
-		if !errors.Is(err, ErrEmptyPassword) {
-			t.Errorf("expected error %v, got %v", ErrEmptyPassword, err)
+		if !errors.EmptyPassword.Is(err) {
+			t.Errorf("expected error %v, got %v", errors.EmptyPassword, err)
 		}
 		if user != nil {
 			t.Errorf("expected nil user, got %v", user)

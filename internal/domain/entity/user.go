@@ -1,12 +1,10 @@
 package entity
 
 import (
-	"errors"
+	"container-manager/internal/errors"
 
 	"golang.org/x/crypto/bcrypt"
 )
-
-var ErrEmptyPassword = errors.New("password cannot be empty")
 
 type User struct {
 	ID       int64
@@ -16,7 +14,7 @@ type User struct {
 
 func NewUser(id int64, username, plainPassword string) (*User, error) {
 	if plainPassword == "" {
-		return nil, ErrEmptyPassword
+		return nil, errors.EmptyPassword
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)

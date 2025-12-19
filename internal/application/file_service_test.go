@@ -39,7 +39,7 @@ func TestFileService_UploadFile(t *testing.T) {
 			t.Error("UploadFile did not return an error for empty filename")
 		}
 		if err.Error() != "filename cannot be empty" {
-			t.Errorf("UploadFile returned wrong error for empty filename: got %q, want %q", err.Error(), "filename cannot be empty")
+			t.Errorf("UploadFile returned wrong error for empty filename: got %q, want %q", err.Error(), "bad request")
 		}
 	})
 

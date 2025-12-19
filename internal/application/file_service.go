@@ -2,7 +2,8 @@ package application
 
 import (
 	"container-manager/internal/domain/infrastructure"
-	"errors"
+	"container-manager/internal/errors"
+
 	"io"
 )
 
@@ -21,7 +22,7 @@ func NewFileService(fs infrastructure.FileStorage) *FileService {
 // UploadFile uploads a file for a specific user.
 func (s *FileService) UploadFile(userID int64, filename string, fileContent io.Reader) error {
 	if filename == "" {
-		return errors.New("filename cannot be empty")
+		return errors.BadRequest
 	}
 
 	_, err := s.fileStorage.SaveFile(userID, filename, fileContent)

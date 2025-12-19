@@ -1,8 +1,8 @@
 package application
 
 import (
+	"container-manager/internal/errors"
 	"context"
-	"errors"
 
 	"container-manager/internal/domain/entity"
 	"container-manager/internal/domain/infrastructure"
@@ -28,7 +28,7 @@ func (s *jobService) GetJob(ctx context.Context, userID int64, id string) (*enti
 		return nil, err
 	}
 	if job.UserID != userID {
-		return nil, errors.New("permission denied")
+		return nil, errors.PermissionDenied
 	}
 	return job, nil
 }
