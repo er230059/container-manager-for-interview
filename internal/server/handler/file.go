@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"fmt"
+	"container-manager/internal/application"
+	"container-manager/internal/errors"
 	"net/http"
 	"strconv"
-
-	"container-manager/internal/application"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,26 +34,31 @@ func NewFileHandler(fs *application.FileService) *FileHandler {
 func (h *FileHandler) UploadFile(c *gin.Context) {
 	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		_ = c.Error(err)
 		return
 	}
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to get file from form: %v", err)})
+		_ = c.Error(errors.BadRequest.Wrap(err))
 		return
 	}
 
 	openedFile, err := file.Open()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to open file: %v", err)})
+		_ = c.Error(errors.InternalServerError.Wrap(err))
 		return
 	}
 	defer openedFile.Close()
 
+	if file.Filename == "" {
+		_ = c.Error(errors.BadRequest.New("filename cannot be empty"))
+		return
+	}
+
 	err = h.fileService.UploadFile(userID, file.Filename, openedFile)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to upload file: %v", err)})
+		_ = c.Error(err)
 		return
 	}
 

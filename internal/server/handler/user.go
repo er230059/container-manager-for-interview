@@ -4,6 +4,7 @@ package handler
 
 import (
 	"container-manager/internal/application"
+	"container-manager/internal/errors"
 	"net/http"
 	"strconv"
 
@@ -32,13 +33,13 @@ func NewUserHandler(service *application.UserService) *UserHandler {
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var req CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		_ = c.Error(errors.BadRequest.Wrap(err))
 		return
 	}
 
 	user, err := h.service.CreateUser(c.Request.Context(), req.Username, req.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
+		_ = c.Error(err)
 		return
 	}
 
@@ -63,17 +64,17 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 func (h *UserHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		_ = c.Error(errors.BadRequest.Wrap(err))
 		return
 	}
 
 	user, token, err := h.service.Login(c.Request.Context(), req.Username, req.Password)
 	if err != nil {
 		if err.Error() == "crypto/bcrypt: hashedPassword is not the hash of the given password" || err.Error() == "user not found" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+			_ = c.Error(errors.Unauthorized)
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to login"})
+		_ = c.Error(err)
 		return
 	}
 

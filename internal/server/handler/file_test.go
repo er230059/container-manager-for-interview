@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"container-manager/internal/server/middleware"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -32,6 +33,7 @@ func TestFileHandler_UploadFile(t *testing.T) {
 
 	// Setup Gin router
 	router := gin.Default()
+	router.Use(middleware.ErrorHandler())
 	// Mock authentication middleware to set userID in context
 	router.Use(func(c *gin.Context) {
 		c.Set("userID", "1234")

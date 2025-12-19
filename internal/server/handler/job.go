@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"container-manager/internal/application"
+	"container-manager/internal/errors"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,24 +33,19 @@ func NewJobHandler(jobService application.JobService) *JobHandler {
 func (h *JobHandler) GetJob(c *gin.Context) {
 	jobID := c.Param("id")
 	if jobID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Job ID is required"})
+		_ = c.Error(errors.BadRequest.New("job ID is required"))
 		return
 	}
 
 	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		_ = c.Error(err)
 		return
 	}
 
 	job, err := h.jobService.GetJob(c.Request.Context(), int64(userID), jobID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	if job == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "job not found"})
+		_ = c.Error(err)
 		return
 	}
 

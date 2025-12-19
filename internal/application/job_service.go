@@ -27,6 +27,9 @@ func (s *jobService) GetJob(ctx context.Context, userID int64, id string) (*enti
 	if err != nil {
 		return nil, err
 	}
+	if job == nil {
+		return nil, errors.JobNotFound
+	}
 	if job.UserID != userID {
 		return nil, errors.PermissionDenied
 	}

@@ -25,6 +25,11 @@ func (e CustomError) Error() string {
 	return e.Message
 }
 
+func (e CustomError) New(message string) error {
+	e.Cause = errors.New(message)
+	return e
+}
+
 func (e CustomError) Wrap(err error) error {
 	if err == nil {
 		return nil
@@ -47,6 +52,7 @@ var (
 	PermissionDenied           = newCustomError(http.StatusForbidden, "permission denied")
 	EmptyPassword              = newCustomError(http.StatusBadRequest, "password cannot be empty")
 	UserNotFound               = newCustomError(http.StatusNotFound, "user not found")
+	JobNotFound                = newCustomError(http.StatusNotFound, "job not found")
 	ContainerNotFound          = newCustomError(http.StatusNotFound, "container not found")
 	ConflictContainerOperation = newCustomError(http.StatusConflict, "conflict container operation")
 	InternalServerError        = newCustomError(http.StatusInternalServerError, "internal server error")

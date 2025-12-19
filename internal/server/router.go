@@ -20,6 +20,8 @@ func RegisterRoutes(
 	jobHandler *handler.JobHandler,
 	authMiddleware *middleware.AuthMiddleware,
 ) {
+	router.Use(middleware.ErrorHandler())
+
 	docs.SwaggerInfo.BasePath = "/"
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

@@ -3,6 +3,7 @@ package handler
 import (
 	"container-manager/internal/application"
 	"container-manager/internal/domain/infrastructure"
+	"container-manager/internal/errors"
 	"net/http"
 	"strconv"
 
@@ -29,13 +30,13 @@ func NewContainerHandler(service *application.ContainerService) *ContainerHandle
 func (h *ContainerHandler) ListContainers(c *gin.Context) {
 	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		_ = c.Error(err)
 		return
 	}
 
 	containers, err := h.service.ListContainers(c.Request.Context(), userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list containers"})
+		_ = c.Error(err)
 		return
 	}
 
@@ -67,14 +68,14 @@ func (h *ContainerHandler) ListContainers(c *gin.Context) {
 func (h *ContainerHandler) CreateContainer(c *gin.Context) {
 	var req CreateContainerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		_ = c.Error(errors.BadRequest.Wrap(err))
 		return
 	}
 
 	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		_ = c.Error(err)
 		return
 	}
 
@@ -87,7 +88,7 @@ func (h *ContainerHandler) CreateContainer(c *gin.Context) {
 	jobID, err := h.service.CreateContainer(c.Request.Context(), userID, opts)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to enqueue container creation job"})
+		_ = c.Error(err)
 		return
 	}
 
@@ -109,23 +110,23 @@ func (h *ContainerHandler) StartContainer(c *gin.Context) {
 	id := c.Param("id")
 	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		_ = c.Error(err)
 		return
 	}
 
 	err = h.service.StartContainer(c.Request.Context(), userID, id)
 	if err != nil {
 		if err.Error() == "permission denied" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "permission denied"})
+			_ = c.Error(errors.PermissionDenied)
 			return
 		} else if err.Error() == "container not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "container not found"})
+			_ = c.Error(errors.ContainerNotFound)
 			return
 		} else if err.Error() == "conflict operation" {
-			c.JSON(http.StatusConflict, gin.H{"error": "conflict operation"})
+			_ = c.Error(errors.ConflictContainerOperation)
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to start container"})
+		_ = c.Error(err)
 		return
 	}
 
@@ -146,23 +147,23 @@ func (h *ContainerHandler) StopContainer(c *gin.Context) {
 	id := c.Param("id")
 	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		_ = c.Error(err)
 		return
 	}
 
 	err = h.service.StopContainer(c.Request.Context(), userID, id)
 	if err != nil {
 		if err.Error() == "permission denied" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "permission denied"})
+			_ = c.Error(errors.PermissionDenied)
 			return
 		} else if err.Error() == "container not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "container not found"})
+			_ = c.Error(errors.ContainerNotFound)
 			return
 		} else if err.Error() == "conflict operation" {
-			c.JSON(http.StatusConflict, gin.H{"error": "conflict operation"})
+			_ = c.Error(errors.ConflictContainerOperation)
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to stop container"})
+		_ = c.Error(err)
 		return
 	}
 
@@ -183,23 +184,23 @@ func (h *ContainerHandler) RemoveContainer(c *gin.Context) {
 	id := c.Param("id")
 	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		_ = c.Error(err)
 		return
 	}
 
 	err = h.service.RemoveContainer(c.Request.Context(), userID, id)
 	if err != nil {
 		if err.Error() == "permission denied" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "permission denied"})
+			_ = c.Error(errors.PermissionDenied)
 			return
 		} else if err.Error() == "container not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "container not found"})
+			_ = c.Error(errors.ContainerNotFound)
 			return
 		} else if err.Error() == "conflict operation" {
-			c.JSON(http.StatusConflict, gin.H{"error": "conflict operation"})
+			_ = c.Error(errors.ConflictContainerOperation)
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to remove container"})
+		_ = c.Error(err)
 		return
 	}
 
