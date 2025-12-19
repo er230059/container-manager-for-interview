@@ -32,14 +32,18 @@ func (r *jobRepository) Create(ctx context.Context, job *entity.Job) error {
 
 func (r *jobRepository) GetByID(ctx context.Context, id string) (*entity.Job, error) {
 	job := &entity.Job{}
+	var result []byte
+	var payload []byte
+	var errStr sql.NullString
+
 	row := r.db.QueryRowContext(ctx, "SELECT id, type, status, payload, result, error, user_id, created_at, updated_at FROM jobs WHERE id = $1", id)
 	err := row.Scan(
 		&job.ID,
 		&job.Type,
 		&job.Status,
-		&job.Payload,
-		&job.Result,
-		&job.Error,
+		&payload,
+		&result,
+		&errStr,
 		&job.UserID,
 		&job.CreatedAt,
 		&job.UpdatedAt,
@@ -50,6 +54,17 @@ func (r *jobRepository) GetByID(ctx context.Context, id string) (*entity.Job, er
 		}
 		return nil, err
 	}
+
+	if payload != nil {
+		job.Payload = payload
+	}
+	if result != nil {
+		job.Result = result
+	}
+	if errStr.Valid {
+		job.Error = errStr.String
+	}
+
 	return job, nil
 }
 

@@ -11,7 +11,7 @@ import (
 type Config struct {
 	Server    ServerConfig
 	Snowflake SnowflakeConfig
-	DB        DBConfig `mapstructure:"db"`
+	DB        DBConfig      `mapstructure:"db"`
 	Storage   StorageConfig `mapstructure:"storage"`
 }
 
@@ -40,6 +40,7 @@ type DBConfig struct {
 // LoadConfig reads configuration from file or environment variables.
 func LoadConfig() (config Config, err error) {
 	viper.AddConfigPath("./")
+	viper.AddConfigPath("../")
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
 

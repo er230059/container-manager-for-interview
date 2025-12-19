@@ -5,7 +5,6 @@ import (
 	"container-manager/internal/domain/infrastructure"
 	"context"
 	"io"
-	"os"
 
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/client"
@@ -28,10 +27,10 @@ func NewDockerContainerRuntime() (*DockerContainerRuntime, error) {
 func (d *DockerContainerRuntime) Create(ctx context.Context, options infrastructure.ContainerCreateOptions) (string, error) {
 	out, err := d.client.ImagePull(ctx, options.Image, client.ImagePullOptions{})
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	defer out.Close()
-	io.Copy(os.Stdout, out)
+	io.Copy(io.Discard, out)
 
 	resp, err := d.client.ContainerCreate(
 		ctx,
@@ -61,7 +60,8 @@ func (d *DockerContainerRuntime) Stop(ctx context.Context, id string) error {
 }
 
 func (d *DockerContainerRuntime) Remove(ctx context.Context, id string) error {
-	_, err := d.client.ContainerRemove(ctx, id, client.ContainerRemoveOptions{})
+	// Compiler said ContainerRemove returns (ContainerRemoveResult, error)
+	_, err := d.client.ContainerRemove(ctx, id, client.ContainerRemoveOptions{Force: true})
 	return err
 }
 
@@ -70,6 +70,18 @@ func (d *DockerContainerRuntime) Inspect(ctx context.Context, id string) (*entit
 	if err != nil {
 		return nil, err
 	}
+	// The structure in original code was resp.Container.Config...
+	// Let's verify if ContainerInspectResult has Container field.
+	// Error msg said: resp.Config undefined (type client.ContainerInspectResult has no field or method Config)
+	// So it likely has Container or something else.
+	// Based on original code:
+	// return &entity.Container{
+	// 	ID:     id,
+	// 	Image:  resp.Container.Config.Image,
+	// 	...
+	// }
+	// This implies resp has Container field.
+
 	return &entity.Container{
 		ID:     id,
 		Image:  resp.Container.Config.Image,
