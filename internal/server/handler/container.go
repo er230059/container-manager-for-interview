@@ -17,6 +17,42 @@ func NewContainerHandler(service *application.ContainerService) *ContainerHandle
 	return &ContainerHandler{service: service}
 }
 
+// ListContainers godoc
+// @Summary List containers
+// @Description Lists all containers belonging to the authenticated user
+// @Tags Containers
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {array} ContainerResponse
+// @Router /containers [get]
+func (h *ContainerHandler) ListContainers(c *gin.Context) {
+	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown user"})
+		return
+	}
+
+	containers, err := h.service.ListContainers(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list containers"})
+		return
+	}
+
+	resp := make([]ContainerResponse, 0, len(containers))
+	for _, ct := range containers {
+		resp = append(resp, ContainerResponse{
+			ID:     ct.ID,
+			Image:  ct.Image,
+			Cmd:    ct.Cmd,
+			Env:    ct.Env,
+			Status: string(ct.Status),
+		})
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
 // CreateContainer godoc
 // @Summary Enqueue a new container creation job
 // @Description Enqueues a job to create a new container for the authenticated user.

@@ -49,3 +49,11 @@ type GetJobResponse struct {
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
 }
+
+type ContainerResponse struct {
+	ID     string   `json:"id"`
+	Image  string   `json:"image"`
+	Cmd    []string `json:"cmd"`
+	Env    []string `json:"env"`
+	Status string   `json:"status"`
+}

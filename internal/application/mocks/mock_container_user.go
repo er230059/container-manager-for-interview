@@ -68,6 +68,21 @@ func (mr *MockContainerUserRepositoryMockRecorder) Delete(ctx, containerID any) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockContainerUserRepository)(nil).Delete), ctx, containerID)
 }
 
+// GetContainerIDsByUserID mocks base method.
+func (m *MockContainerUserRepository) GetContainerIDsByUserID(ctx context.Context, userID int64) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContainerIDsByUserID", ctx, userID)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContainerIDsByUserID indicates an expected call of GetContainerIDsByUserID.
+func (mr *MockContainerUserRepositoryMockRecorder) GetContainerIDsByUserID(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContainerIDsByUserID", reflect.TypeOf((*MockContainerUserRepository)(nil).GetContainerIDsByUserID), ctx, userID)
+}
+
 // GetUserIDByContainerID mocks base method.
 func (m *MockContainerUserRepository) GetUserIDByContainerID(ctx context.Context, containerID string) (int64, error) {
 	m.ctrl.T.Helper()

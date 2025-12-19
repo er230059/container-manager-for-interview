@@ -38,3 +38,22 @@ func (r *ContainerUserRepository) GetUserIDByContainerID(ctx context.Context, co
 	}
 	return userID, nil
 }
+
+func (r *ContainerUserRepository) GetContainerIDsByUserID(ctx context.Context, userID int64) ([]string, error) {
+	query := "SELECT container_id FROM container_user WHERE user_id = $1"
+	rows, err := r.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var containerIDs []string
+	for rows.Next() {
+		var containerID string
+		if err := rows.Scan(&containerID); err != nil {
+			return nil, err
+		}
+		containerIDs = append(containerIDs, containerID)
+	}
+	return containerIDs, rows.Err()
+}

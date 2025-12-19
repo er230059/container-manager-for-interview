@@ -32,6 +32,7 @@ func RegisterRoutes(
 	containerRoutes := router.Group("/containers")
 	containerRoutes.Use(authMiddleware.Handle())
 	{
+		containerRoutes.GET("", containerHandler.ListContainers)
 		containerRoutes.POST("", containerHandler.CreateContainer)
 		containerRoutes.PATCH("/:id/start", containerHandler.StartContainer)
 		containerRoutes.PATCH("/:id/stop", containerHandler.StopContainer)

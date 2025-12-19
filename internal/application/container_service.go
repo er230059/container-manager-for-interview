@@ -174,6 +174,27 @@ func (s *ContainerService) RemoveContainer(ctx context.Context, userID int64, id
 	return err
 }
 
+func (s *ContainerService) ListContainers(ctx context.Context, userID int64) ([]*entity.Container, error) {
+	containerIDs, err := s.containerUserRepo.GetContainerIDsByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var containers []*entity.Container
+	for _, id := range containerIDs {
+		container, err := s.runtime.Inspect(ctx, id)
+		if err != nil {
+			// Log error and continue, or return partial list?
+			// For now, let's just log and continue, assuming the container might have been removed manually
+			log.Printf("failed to inspect container %s: %v", id, err)
+			continue
+		}
+		containers = append(containers, container)
+	}
+
+	return containers, nil
+}
+
 func (s *ContainerService) getMutex(id string) *sync.Mutex {
 	m, _ := s.mutexMap.LoadOrStore(id, &sync.Mutex{})
 	return m.(*sync.Mutex)

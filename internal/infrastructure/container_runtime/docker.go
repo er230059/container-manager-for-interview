@@ -71,6 +71,7 @@ func (d *DockerContainerRuntime) Inspect(ctx context.Context, id string) (*entit
 		return nil, err
 	}
 	return &entity.Container{
+		ID:     id,
 		Image:  resp.Container.Config.Image,
 		Cmd:    resp.Container.Config.Cmd,
 		Env:    resp.Container.Config.Env,
