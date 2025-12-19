@@ -73,7 +73,6 @@ func (h *ContainerHandler) CreateContainer(c *gin.Context) {
 	}
 
 	userID, err := strconv.ParseInt(c.GetString("userID"), 10, 64)
-
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -116,16 +115,6 @@ func (h *ContainerHandler) StartContainer(c *gin.Context) {
 
 	err = h.service.StartContainer(c.Request.Context(), userID, id)
 	if err != nil {
-		if err.Error() == "permission denied" {
-			_ = c.Error(errors.PermissionDenied)
-			return
-		} else if err.Error() == "container not found" {
-			_ = c.Error(errors.ContainerNotFound)
-			return
-		} else if err.Error() == "conflict operation" {
-			_ = c.Error(errors.ConflictContainerOperation)
-			return
-		}
 		_ = c.Error(err)
 		return
 	}
@@ -153,16 +142,6 @@ func (h *ContainerHandler) StopContainer(c *gin.Context) {
 
 	err = h.service.StopContainer(c.Request.Context(), userID, id)
 	if err != nil {
-		if err.Error() == "permission denied" {
-			_ = c.Error(errors.PermissionDenied)
-			return
-		} else if err.Error() == "container not found" {
-			_ = c.Error(errors.ContainerNotFound)
-			return
-		} else if err.Error() == "conflict operation" {
-			_ = c.Error(errors.ConflictContainerOperation)
-			return
-		}
 		_ = c.Error(err)
 		return
 	}
@@ -190,16 +169,6 @@ func (h *ContainerHandler) RemoveContainer(c *gin.Context) {
 
 	err = h.service.RemoveContainer(c.Request.Context(), userID, id)
 	if err != nil {
-		if err.Error() == "permission denied" {
-			_ = c.Error(errors.PermissionDenied)
-			return
-		} else if err.Error() == "container not found" {
-			_ = c.Error(errors.ContainerNotFound)
-			return
-		} else if err.Error() == "conflict operation" {
-			_ = c.Error(errors.ConflictContainerOperation)
-			return
-		}
 		_ = c.Error(err)
 		return
 	}

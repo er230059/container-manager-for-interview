@@ -300,3 +300,79 @@ func TestContainerService_RemoveContainer_PermissionDenied(t *testing.T) {
 	err := service.RemoveContainer(ctx, userID, containerID)
 	assert.EqualError(t, err, "permission denied")
 }
+
+func TestContainerService_ListContainers(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRuntime := mocks.NewMockContainerRuntime(ctrl)
+	mockContainerUserRepo := mocks.NewMockContainerUserRepository(ctrl)
+
+	service := NewContainerService(mockRuntime, mockContainerUserRepo, nil)
+
+	ctx := context.Background()
+	userID := int64(1)
+	containerID1 := "container-1"
+	containerID2 := "container-2"
+
+	expectedContainer1 := &entity.Container{ID: containerID1, Image: "test-image-1"}
+	expectedContainer2 := &entity.Container{ID: containerID2, Image: "test-image-2"}
+
+	mockContainerUserRepo.EXPECT().GetContainerIDsByUserID(ctx, userID).Return([]string{containerID1, containerID2}, nil)
+	mockRuntime.EXPECT().Inspect(ctx, containerID1).Return(expectedContainer1, nil)
+	mockRuntime.EXPECT().Inspect(ctx, containerID2).Return(expectedContainer2, nil)
+
+	containers, err := service.ListContainers(ctx, userID)
+	assert.NoError(t, err)
+	assert.Len(t, containers, 2)
+	assert.Equal(t, expectedContainer1, containers[0])
+	assert.Equal(t, expectedContainer2, containers[1])
+}
+
+func TestContainerService_ListContainers_RepoError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRuntime := mocks.NewMockContainerRuntime(ctrl)
+	mockContainerUserRepo := mocks.NewMockContainerUserRepository(ctrl)
+
+	service := NewContainerService(mockRuntime, mockContainerUserRepo, nil)
+
+	ctx := context.Background()
+	userID := int64(1)
+	repoErr := errors.New("repo error")
+
+	mockContainerUserRepo.EXPECT().GetContainerIDsByUserID(ctx, userID).Return(nil, repoErr)
+
+	containers, err := service.ListContainers(ctx, userID)
+	assert.Error(t, err)
+	assert.Equal(t, repoErr, err)
+	assert.Nil(t, containers)
+}
+
+func TestContainerService_ListContainers_InspectError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRuntime := mocks.NewMockContainerRuntime(ctrl)
+	mockContainerUserRepo := mocks.NewMockContainerUserRepository(ctrl)
+
+	service := NewContainerService(mockRuntime, mockContainerUserRepo, nil)
+
+	ctx := context.Background()
+	userID := int64(1)
+	containerID1 := "container-1"
+	containerID2 := "container-2"
+
+	expectedContainer1 := &entity.Container{ID: containerID1, Image: "test-image-1"}
+	inspectErr := errors.New("inspect error")
+
+	mockContainerUserRepo.EXPECT().GetContainerIDsByUserID(ctx, userID).Return([]string{containerID1, containerID2}, nil)
+	mockRuntime.EXPECT().Inspect(ctx, containerID1).Return(expectedContainer1, nil)
+	mockRuntime.EXPECT().Inspect(ctx, containerID2).Return(nil, inspectErr)
+
+	containers, err := service.ListContainers(ctx, userID)
+	assert.NoError(t, err)
+	assert.Len(t, containers, 1)
+	assert.Equal(t, expectedContainer1, containers[0])
+}
