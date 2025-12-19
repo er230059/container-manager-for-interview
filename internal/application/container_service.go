@@ -164,11 +164,11 @@ func (s *ContainerService) RemoveContainer(ctx context.Context, userID int64, id
 		if containerUserID != userID {
 			return nil, errors.New("permission denied")
 		}
-		err = s.containerUserRepo.Delete(ctx, id)
+		err = s.runtime.Remove(ctx, id)
 		if err != nil {
 			return nil, err
 		}
-		err = s.runtime.Remove(ctx, id)
+		err = s.containerUserRepo.Delete(ctx, id)
 		return nil, err
 	})
 	return err
