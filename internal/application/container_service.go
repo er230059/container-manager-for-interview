@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"sync"
 	"time"
+
+	"golang.org/x/sync/singleflight"
 
 	"container-manager/internal/domain/entity"
 	"container-manager/internal/domain/infrastructure"
@@ -17,6 +20,9 @@ type ContainerService struct {
 	runtime           infrastructure.ContainerRuntime
 	containerUserRepo infrastructure.ContainerUserRepository
 	jobRepo           infrastructure.JobRepository
+
+	singleflightGroup singleflight.Group
+	mutexMap          sync.Map
 }
 
 func NewContainerService(runtime infrastructure.ContainerRuntime, containerUserRepo infrastructure.ContainerUserRepository, jobRepo infrastructure.JobRepository) *ContainerService {
@@ -102,40 +108,73 @@ func (s *ContainerService) runCreateContainerJob(job *entity.Job, userID int64, 
 }
 
 func (s *ContainerService) StartContainer(ctx context.Context, userID int64, id string) error {
-	containerUserID, err := s.containerUserRepo.GetUserIDByContainerID(ctx, id)
-	if err != nil {
-		return err
-	}
-	if containerUserID != userID {
-		return errors.New("permission denied")
-	}
-	return s.runtime.Start(ctx, id)
+	_, err, _ := s.singleflightGroup.Do("start:"+id, func() (any, error) {
+		mutex := s.getMutex(id)
+		if !mutex.TryLock() {
+			return nil, errors.New("conflict operation")
+		}
+		defer mutex.Unlock()
+
+		containerUserID, err := s.containerUserRepo.GetUserIDByContainerID(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		if containerUserID != userID {
+			return nil, errors.New("permission denied")
+		}
+		err = s.runtime.Start(ctx, id)
+		return nil, err
+	})
+	return err
 }
 
 func (s *ContainerService) StopContainer(ctx context.Context, userID int64, id string) error {
-	containerUserID, err := s.containerUserRepo.GetUserIDByContainerID(ctx, id)
-	if err != nil {
-		return err
-	}
-	if containerUserID != userID {
-		return errors.New("permission denied")
-	}
-	return s.runtime.Stop(ctx, id)
+	_, err, _ := s.singleflightGroup.Do("stop:"+id, func() (any, error) {
+		mutex := s.getMutex(id)
+		if !mutex.TryLock() {
+			return nil, errors.New("conflict operation")
+		}
+		defer mutex.Unlock()
+
+		containerUserID, err := s.containerUserRepo.GetUserIDByContainerID(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		if containerUserID != userID {
+			return nil, errors.New("permission denied")
+		}
+		err = s.runtime.Stop(ctx, id)
+		return nil, err
+	})
+	return err
 }
 
 func (s *ContainerService) RemoveContainer(ctx context.Context, userID int64, id string) error {
-	containerUserID, err := s.containerUserRepo.GetUserIDByContainerID(ctx, id)
-	if err != nil {
-		return err
-	}
-	if containerUserID != userID {
-		return errors.New("permission denied")
-	}
+	_, err, _ := s.singleflightGroup.Do("remove:"+id, func() (any, error) {
+		mutex := s.getMutex(id)
+		if !mutex.TryLock() {
+			return nil, errors.New("conflict operation")
+		}
+		defer s.mutexMap.Delete(id)
 
-	err = s.containerUserRepo.Delete(ctx, id)
-	if err != nil {
-		return err
-	}
+		containerUserID, err := s.containerUserRepo.GetUserIDByContainerID(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		if containerUserID != userID {
+			return nil, errors.New("permission denied")
+		}
+		err = s.containerUserRepo.Delete(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		err = s.runtime.Remove(ctx, id)
+		return nil, err
+	})
+	return err
+}
 
-	return s.runtime.Remove(ctx, id)
+func (s *ContainerService) getMutex(id string) *sync.Mutex {
+	m, _ := s.mutexMap.LoadOrStore(id, &sync.Mutex{})
+	return m.(*sync.Mutex)
 }

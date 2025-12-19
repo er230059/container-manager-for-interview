@@ -85,6 +85,9 @@ func (h *ContainerHandler) StartContainer(c *gin.Context) {
 		} else if err.Error() == "container not found" {
 			c.JSON(http.StatusNotFound, gin.H{"error": "container not found"})
 			return
+		} else if err.Error() == "conflict operation" {
+			c.JSON(http.StatusConflict, gin.H{"error": "conflict operation"})
+			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to start container"})
 		return
@@ -119,6 +122,9 @@ func (h *ContainerHandler) StopContainer(c *gin.Context) {
 		} else if err.Error() == "container not found" {
 			c.JSON(http.StatusNotFound, gin.H{"error": "container not found"})
 			return
+		} else if err.Error() == "conflict operation" {
+			c.JSON(http.StatusConflict, gin.H{"error": "conflict operation"})
+			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to stop container"})
 		return
@@ -152,6 +158,9 @@ func (h *ContainerHandler) RemoveContainer(c *gin.Context) {
 			return
 		} else if err.Error() == "container not found" {
 			c.JSON(http.StatusNotFound, gin.H{"error": "container not found"})
+			return
+		} else if err.Error() == "conflict operation" {
+			c.JSON(http.StatusConflict, gin.H{"error": "conflict operation"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to remove container"})
