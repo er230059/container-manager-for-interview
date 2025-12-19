@@ -81,6 +81,6 @@ func TestFileHandler_UploadFile(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Contains(t, w.Body.String(), "failed to get file from form")
+		assert.Contains(t, w.Body.String(), "bad request")
 	})
 }

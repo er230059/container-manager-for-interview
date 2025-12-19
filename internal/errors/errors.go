@@ -27,7 +27,7 @@ func (e CustomError) Error() string {
 
 func (e CustomError) New(message string) error {
 	e.Cause = errors.New(message)
-	return e
+	return &e
 }
 
 func (e CustomError) Wrap(err error) error {
@@ -35,7 +35,7 @@ func (e CustomError) Wrap(err error) error {
 		return nil
 	}
 	e.Cause = err
-	return e
+	return &e
 }
 
 func (e CustomError) Is(err error) bool {
