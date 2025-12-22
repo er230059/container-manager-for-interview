@@ -20,16 +20,16 @@
 
 預設會讀取 `config.yaml` 的設定值，可使用以下環境變數覆蓋
 
-| Config Key | 環境變數 | 說明 |
+| 環境變數 | 說明 | 範例 |
 | :--- | :--- | :--- |
-| `server.port` | `SERVER_PORT` | 服務監聽埠號 |
-| `server.jwt_secret` | `SERVER_JWT_SECRET` | JWT 簽章密鑰 |
-| `db.host` | `DB_HOST` | 資料庫主機 |
-| `db.port` | `DB_PORT` | 資料庫埠號 |
-| `db.user` | `DB_USER` | 資料庫使用者 |
-| `db.password` | `DB_PASSWORD` | 資料庫密碼 |
-| `db.name` | `DB_NAME` | 資料庫名稱 |
-| `storage.base_path` | `STORAGE_BASE_PATH` | 檔案上傳儲存路徑 |
+| `SERVER_PORT` | 服務監聽埠號 | 8080 |
+| `SERVER_JWT_SECRET` | JWT 簽章密鑰 | abc12345 |
+| `DB_HOST` | 資料庫主機 | localhost |
+| `DB_PORT` | 資料庫埠號 | 5432  |
+| `DB_USER` | 資料庫使用者 | postgres |
+| `DB_PASSWORD` | 資料庫密碼 | password |
+| `DB_NAME` | 資料庫名稱 | container_manager |
+| `STORAGE_BASE_PATH` | 檔案上傳儲存路徑 | /tmp/container_manager |
 
 ### 初始化資料庫
 
